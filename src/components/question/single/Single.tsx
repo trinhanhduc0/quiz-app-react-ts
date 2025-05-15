@@ -28,6 +28,8 @@ const SingleChoiceQuestion: React.FC<Props> = ({
   useEffect(() => {
     if (answer) {
       setSelectedChoice(answer);
+    } else {
+      setSelectedChoice(null);
     }
   }, [answer]);
 
@@ -36,13 +38,11 @@ const SingleChoiceQuestion: React.FC<Props> = ({
 
     setSelectedChoice(optionId);
 
-    // Create the options array for API format
     const options = [{ id: optionId }];
 
-    // Notify the parent component about the change with a flat structure
     onAnswerChange({
-      answer: optionId, // This is the simple string ID
-      options: options, // This is the array format for the API
+      answer: optionId,
+      options: options,
     });
   };
 
@@ -86,7 +86,7 @@ const SingleChoiceQuestion: React.FC<Props> = ({
             <input
               type="radio"
               value={option.id}
-              checked={showAnswer ? option.iscorrect : selectedChoice === option.id}
+              checked={showAnswer ? !!option.iscorrect : selectedChoice === option.id}
               onChange={() => handleOptionChange(option.id as string)}
               disabled={isDone}
               className="h-5 w-5 text-blue-600 border-gray-300 rounded-full focus:ring-blue-500 mr-4"

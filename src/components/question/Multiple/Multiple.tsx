@@ -26,7 +26,7 @@ const MultipleChoiceQuestion: React.FC<Props> = ({
   const [selectedValues, setSelectedValues] = useState<string[]>([]);
 
   const handleCheckboxChange = (optionId: string) => {
-    if (isDone) return;
+    if (isDone || showAnswer) return;
 
     const newSelectedValues = selectedValues.includes(optionId)
       ? selectedValues.filter((id) => id !== optionId)
@@ -34,22 +34,17 @@ const MultipleChoiceQuestion: React.FC<Props> = ({
 
     setSelectedValues(newSelectedValues);
 
-    // Create the options array for API format
+    // Format for API
     const options = newSelectedValues.map((id) => ({ id }));
-
-    // For multiple choice, we'll use the first selected option as the answer
     const answerValue = newSelectedValues;
 
-    console.log(newSelectedValues, options);
-    // Notify the parent component about the change with a flat structure
     onAnswerChange({
-      answer: answerValue, // This is the simple string ID
-      options: options, // This is the array format for the API
+      answer: answerValue,
+      options: options,
     });
   };
 
   const isChecked = (option: Option) => {
-    console.log(option);
     if (showAnswer) {
       return option.iscorrect;
     }
@@ -64,12 +59,13 @@ const MultipleChoiceQuestion: React.FC<Props> = ({
 
       <div className="space-y-6">
         {question.options?.map((option) => {
-          const isSelected = selectedValues.includes(option.id as string);
+          const checked = isChecked(option);
           const isCorrect = option.iscorrect;
+
           const highlight =
             showAnswer && isCorrect
               ? 'border-green-500 bg-green-50'
-              : !showAnswer && isSelected
+              : !showAnswer && checked
                 ? 'border-blue-500 bg-blue-50'
                 : 'border-gray-300 hover:border-blue-500';
 
@@ -77,15 +73,15 @@ const MultipleChoiceQuestion: React.FC<Props> = ({
             <label
               key={option.id}
               className={`flex items-center p-2 border rounded-lg transition-all duration-300 cursor-pointer ${highlight} ${
-                isDone ? 'cursor-not-allowed opacity-70' : ''
+                isDone || showAnswer ? 'cursor-not-allowed opacity-70' : ''
               }`}
             >
               <input
                 type="checkbox"
                 value={option.id}
-                checked={isChecked(option)}
+                checked={checked}
                 onChange={() => handleCheckboxChange(option.id as string)}
-                disabled={isDone}
+                disabled={isDone || showAnswer}
                 className="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mr-4"
               />
               <div className="flex flex-col sm:flex-row items-center w-full gap-4">

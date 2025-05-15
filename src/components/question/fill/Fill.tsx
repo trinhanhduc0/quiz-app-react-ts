@@ -71,7 +71,6 @@ const FillInTheBlankQuestion: React.FC<Props> = ({
   };
 
   const getInputValue = (item: FillInTheBlank): string => {
-    console.log(item);
     if (showAnswer) {
       return item.correct_answer || '';
     }

@@ -80,6 +80,10 @@ const DoTest: React.FC = () => {
     });
   };
 
+  const handleCurrentQuestionAnswerChange = (answer: Answer) => {
+    handleAnswerChange(currentQuestion._id, answer);
+  };
+
   const apiSendTest = async () => {
     const filteredAnswers = Object.entries(answers).reduce(
       (acc, [key, value]) => {
@@ -128,8 +132,9 @@ const DoTest: React.FC = () => {
         alert('Đã có lỗi xảy ra khi nộp bài. Vui lòng thử lại.');
       }
     } else {
+      localStorage.removeItem(`test_end_time_${testId}`);
+      localStorage.removeItem(startTimeCache);
       setIsDone(true);
-      // setShowAnswer(true);
       const cached = localStorage.getItem(questionCache);
       if (cached) {
         const parsed = JSON.parse(cached);
@@ -212,12 +217,14 @@ const DoTest: React.FC = () => {
           if ('answer' in parsed) {
             setIsDone(true);
             setScore(parsed.answer.score);
-            console.log(parsed.answer.question_answer);
             setAnswers(parsed.answer.question_answer);
           } else {
             const savedAnswers = localStorage.getItem(answerCache);
             if (savedAnswers) setAnswers(JSON.parse(savedAnswers));
-            timerCleanup = startCountdown(parsed.test_info);
+            console.log(isTest);
+            if (isTest == 'true') {
+              timerCleanup = startCountdown(parsed.test_info);
+            }
           }
           return;
         }
@@ -305,22 +312,26 @@ const DoTest: React.FC = () => {
       {!isDone && (
         <div className="space-y-2">
           <div className="flex justify-between items-center">
-            <div className="text-lg font-semibold text-red-600">
-              Thời gian còn lại: {countdownTime.hours}h {countdownTime.minutes}m{' '}
-              {countdownTime.seconds}s
-            </div>
+            {isTest == 'true' && (
+              <div className="text-lg font-semibold text-red-600">
+                Thời gian còn lại: {countdownTime.hours}h {countdownTime.minutes}m{' '}
+                {countdownTime.seconds}s
+              </div>
+            )}
             <div className="flex items-center gap-2">
               {saveStatus === 'saving' && (
                 <span className="text-yellow-500 text-sm">Đang lưu...</span>
               )}
               {saveStatus === 'saved' && <span className="text-green-500 text-sm">Đã lưu</span>}
               {saveStatus === 'error' && <span className="text-red-500 text-sm">Lỗi lưu</span>}
-              <button
-                onClick={handleSendTest}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-              >
-                Nộp bài
-              </button>
+              {isTest == 'true' && (
+                <button
+                  onClick={handleSendTest}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+                >
+                  Nộp bài
+                </button>
+              )}
             </div>
           </div>
 
@@ -344,19 +355,18 @@ const DoTest: React.FC = () => {
         </div>
       )}
 
-      {/* Câu hỏi */}
-      {currentQuestion && (
+      {currentQuestion ? (
         <div>
           <QuestionComponent
             question={currentQuestion}
             isDone={isDone}
             showAnswer={showAnswer}
             answer={answers[currentQuestion._id] || null}
-            onAnswerChange={(ans) => handleAnswerChange(currentQuestion._id, ans)}
+            onAnswerChange={handleCurrentQuestionAnswerChange}
             author={author || ''}
           />
         </div>
-      )}
+      ) : null}
 
       {/* Điều hướng câu hỏi */}
       <div className="flex justify-between mt-6">
@@ -380,7 +390,20 @@ const DoTest: React.FC = () => {
           Câu tiếp <ChevronRight className="ml-2" />
         </button>
       </div>
-      {!isTest && <button onClick={handleShowAnswer}>CLICK</button>}
+      {console.log(isDone, isTest)}
+      {(isDone || isTest !== 'true') && (
+        <div className="flex justify-center items-center">
+          <button
+            onClick={handleShowAnswer}
+            className={`px-4 py-2 rounded-full font-semibold transition-colors duration-200 
+        ${showAnswer ? 'bg-blue-500 text-white hover:bg-white-600' : 'bg-gray-300 text-gray-800 hover:bg-gray-400'}
+      `}
+          >
+            {showAnswer ? 'Ẩn đáp án' : 'Hiện đáp án'}
+          </button>
+        </div>
+      )}
+
       {/* Danh sách câu */}
       <div className="flex flex-wrap gap-2 mt-4">
         {questions.map((q, i) => {
