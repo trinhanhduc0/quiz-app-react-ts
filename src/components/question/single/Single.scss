@@ -1,0 +1,33 @@
+.ant-space-item {
+  .ant-radio-wrapper {
+    justify-content: center;
+    align-items: center;
+    .ant-radio {
+      display: none;
+    }
+
+    // Khi ant-radio-checked được áp dụng, thay đổi màu sắc của phần tử cha
+    &.ant-radio-wrapper-checked {
+      background-color: #4b87f6; // Màu nền khi radio được chọn
+      border-color: #4b87f6; // Màu viền khi radio được chọn
+
+      // Thêm các kiểu khác nếu cần
+      .ant-radio-inner {
+        background-color: #4b87f6; // Màu của vòng tròn bên trong khi được chọn
+        border-color: #4b87f6; // Màu viền của vòng tròn bên trong khi được chọn
+      }
+    }
+
+    // Nếu radio không được chọn, kiểu mặc định
+    &:not(.ant-radio-wrapper-checked) {
+      background-color: #f7fafc; // Màu nền mặc định
+      border-color: #e2e8f0; // Màu viền mặc định
+
+      .ant-radio-inner {
+        background-color: #f7fafc; // Màu của vòng tròn bên trong khi không được chọn
+        border-color: #e2e8f0; // Màu viền của vòng tròn bên trong khi không được chọn
+      }
+    }
+  }
+}
+

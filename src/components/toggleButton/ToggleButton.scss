@@ -1,0 +1,53 @@
+.button-navigate {
+  height: auto;
+  padding: auto;
+  .toggle-btn {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    width: 30px;
+    height: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0;
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: scale(1.1); // Phóng to nhẹ khi hover
+    }
+
+    // Thanh ngang
+    &::before,
+    &::after,
+    .middle-bar {
+      content: "";
+      width: 100%;
+      height: 100%;
+      background-color: #c6cfd0;
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+
+    // Thanh trên cùng
+    &::before {
+      transform: translateY(-8px);
+    }
+
+    // Thanh giữa
+    .middle-bar {
+      width: 70%; // Thanh giữa ngắn hơn
+    }
+
+    // Thanh dưới cùng
+    &::after {
+      transform: translateY(8px);
+    }
+
+    &:active {
+      transform: scale(0.9); // Thu nhỏ khi nhấn
+    }
+  }
+}

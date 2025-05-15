@@ -1,0 +1,13 @@
+{
+  "root": [
+    "./src/app.tsx",
+    "./src/main.tsx",
+    "./src/vite-env.d.ts",
+    "./src/locales/i18n.ts",
+    "./src/locales/resources.ts",
+    "./src/locales/en/common.ts",
+    "./src/locales/vi/common.ts"
+  ],
+  "errors": true,
+  "version": "5.7.3"
+}

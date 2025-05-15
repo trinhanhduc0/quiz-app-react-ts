@@ -1,0 +1,35 @@
+.ant-checkbox-group {
+  width: 100%;
+  .ant-space-item {
+    width: 100%;
+    .ant-checkbox-wrapper {
+      /* Mặc định màu nền */
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      background-color: white;
+      border-color: #ccc;
+
+      .ant-checkbox {
+        display: none;
+      }
+
+      &.ant-checkbox-wrapper-checked {
+        /* Thêm màu sắc khi được chọn */
+        background-color: #4b87f6; /* Màu nền khi checkbox được chọn */
+        border-color: #4b87f6; /* Màu viền khi checkbox được chọn */
+      }
+
+      .ant-checkbox-inner {
+        /* Thêm màu cho dấu check bên trong */
+        background-color: #fff;
+        border-color: #4b87f6;
+      }
+
+      &:hover {
+        /* Hiệu ứng hover */
+        border-color: #4b87f6;
+      }
+    }
+  }
+}

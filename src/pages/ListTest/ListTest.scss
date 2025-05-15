@@ -1,0 +1,167 @@
+.list-test-container {
+  width: 100%;
+  padding: 20px;
+  background-color: #f7f9fc;
+  font-family: "Roboto", sans-serif;
+
+  .main-content {
+    margin-top: 20px;
+  }
+
+  .loading-state {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 60vh;
+  }
+
+  .error-message {
+    margin-top: 20px;
+  }
+
+  .list-test-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .test-item {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .test-title {
+      font-size: 1.5rem;
+      color: #2980b9;
+      margin-bottom: 10px;
+    }
+
+    .test-description {
+      text-wrap: auto;
+      font-size: 1.1rem;
+      color: #7f8c8d;
+      margin-bottom: 15px;
+    }
+
+    .test-dates {
+      display: flex;
+      justify-content: space-between;
+      font-size: 1rem;
+      color: #7f8c8d;
+      margin-bottom: 15px;
+
+      .start-time,
+      .end-time {
+        font-weight: bold;
+        color: #3498db;
+      }
+
+      .start-date,
+      .end-date {
+        font-style: italic;
+      }
+    }
+
+    .test-duration {
+      font-size: 1.1rem;
+      color: #7f8c8d;
+      margin-bottom: 15px;
+    }
+
+    .start-test-btn {
+      background-color: #2980b9;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      transition: background-color 0.3s ease;
+
+      &:hover {
+        background-color: #3498db;
+      }
+    }
+  }
+
+  .no-tests {
+    font-size: 1.2rem;
+    color: #e74c3c;
+  }
+
+  /* Responsive styling */
+  @media (max-width: 768px) {
+    padding: 15px;
+
+    .test-item {
+      padding: 15px;
+
+      .test-title {
+        font-size: 1.3rem;
+      }
+
+      .test-description,
+      .test-duration {
+        font-size: 1rem;
+      }
+
+      .test-dates {
+        flex-direction: column;
+        gap: 10px;
+        font-size: 0.9rem;
+      }
+
+      .start-test-btn {
+        width: 100%;
+        font-size: 1rem;
+      }
+    }
+  }
+
+  @media (max-width: 480px) {
+    padding: 10px;
+
+    .test-item {
+      padding: 10px;
+
+      .test-title {
+        font-size: 1.2rem;
+      }
+
+      .test-description,
+      .test-duration {
+        font-size: 0.9rem;
+      }
+
+      .test-dates {
+        font-size: 0.8rem;
+
+        .start-time,
+        .end-time {
+          font-size: 0.9rem;
+        }
+
+        .start-date,
+        .end-date {
+          font-size: 0.8rem;
+        }
+      }
+
+      .start-test-btn {
+        font-size: 0.9rem;
+        padding: 8px;
+      }
+    }
+
+    .no-tests {
+      font-size: 1rem;
+    }
+  }
+}

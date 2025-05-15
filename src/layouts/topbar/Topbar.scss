@@ -1,0 +1,131 @@
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.topbar {
+  position: fixed;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(#7886c7, #4e8de5);
+  color: #fff;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  transition: all 1s ease;
+  animation: fadeIn 0.2s ease-out;
+
+  .left {
+    display: flex;
+    align-items: center;
+    flex: 1;
+  }
+  .right {
+    display: flex;
+    align-items: center;
+    flex: 2;
+  }
+
+  .center {
+    display: flex;
+    justify-content: center;
+    flex: 3;
+  }
+
+  .logo {
+    font-size: 2rem;
+    font-style: italic;
+    color: #fff;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    transition: transform 0.3s ease;
+
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
+
+  .right {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    flex: 1;
+    position: relative;
+    .login-btn,
+    .logout-btn {
+      background-color: #fff;
+      color: #4267b2;
+      font-size: 16px;
+      font-weight: bold;
+      padding: 8px 16px;
+      border-radius: 5px;
+      margin-left: 20px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, color 0.3s ease,
+        transform 0.2s ease;
+
+      &:hover {
+        background-color: #4e8de5;
+        color: #fff;
+        transform: scale(1.05);
+      }
+
+      .link {
+        text-decoration: none;
+        color: inherit; // Inherit color for better consistency
+      }
+    }
+  }
+
+  .user,
+  .language {
+    font-size: 18px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-left: 20px;
+    transition: color 0.3s ease;
+
+    &:hover {
+      color: #cde3ff;
+    }
+  }
+
+  .dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: #fff;
+    color: #333;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    overflow: hidden;
+    z-index: 1001;
+    min-width: 150px;
+  }
+
+  .dropdownItem {
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+
+    &:hover {
+      background-color: #e9eff7;
+      color: #4267b2;
+    }
+  }
+
+  .link {
+    text-decoration: none;
+    color: #333;
+  }
+}

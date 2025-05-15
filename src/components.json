@@ -1,0 +1,15 @@
+{
+  "componentPath": "./src/components",
+  "rsc": false,
+  "typescript": true,
+  "tailwind": {
+    "config": "tailwind.config.ts",
+    "css": "src/index.css",
+    "baseColor": "zinc",
+    "font": "inter"
+  },
+  "aliases": {
+    "components": "@/components",
+    "lib": "@/lib"
+  }
+}
