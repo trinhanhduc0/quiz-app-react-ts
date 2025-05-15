@@ -146,7 +146,7 @@ const QuestionComponent: React.FC<QuestionBaseProps> = ({
             question={question}
             onAnswerChange={handleAnswerUpdate}
             answer={getTypedAnswer('fill_in_the_blank') as FillInTheBlankAnswer}
-            isDone={isDone}
+            isDone={isDone || showAnswer}
             showAnswer={showAnswer}
           />
         );
@@ -157,7 +157,7 @@ const QuestionComponent: React.FC<QuestionBaseProps> = ({
             onAnswerChange={handleAnswerUpdate}
             answer={getTypedAnswer('single_choice_question') as MultipleChoiceAnswer}
             author={author ?? ''}
-            isDone={isDone}
+            isDone={isDone || showAnswer}
             showAnswer={showAnswer}
           />
         );
@@ -168,7 +168,7 @@ const QuestionComponent: React.FC<QuestionBaseProps> = ({
             author={author}
             onAnswerChange={handleAnswerUpdate}
             answer={getTypedAnswer('multiple_choice_question') as MultipleChoiceAnswer}
-            isDone={isDone}
+            isDone={isDone || showAnswer}
             showAnswer={showAnswer}
           />
         );
@@ -178,7 +178,7 @@ const QuestionComponent: React.FC<QuestionBaseProps> = ({
             order_items={question.order_items as OrderItem[]}
             onAnswerChange={handleAnswerUpdate}
             answer={getTypedAnswer('order_question') as OrderAnswer}
-            isDone={isDone}
+            isDone={isDone || showAnswer}
             showAnswer={showAnswer}
           />
         );
@@ -190,7 +190,7 @@ const QuestionComponent: React.FC<QuestionBaseProps> = ({
             match_options={question.match_options as MatchOption[]}
             onAnswerChange={handleAnswerUpdate}
             answer={getTypedAnswer('match_choice_question') as MatchAnswer}
-            isDone={isDone}
+            isDone={isDone || showAnswer}
             showAnswer={showAnswer}
           />
         );
