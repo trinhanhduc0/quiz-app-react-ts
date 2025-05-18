@@ -17,13 +17,13 @@ const Topbar: React.FC<TopbarProps> = ({ onClickLeft, onClickRight, isOpen }) =>
   if (isOpen) return null;
 
   return (
-    <div className="topbar">
+    <div className="topbar bg-gradient-to-b from-blue-400 to-gray-300">
       <div className="left">
         <ToggleButton onClickButton={onClickLeft} />
       </div>
       <div className="center">
         <div className="logo" onClick={() => navigate('/dashboard')} role="button">
-          QUIZ APP
+          <img className="h-[auto] w-[150px] p-2 " src="/logo.png" alt="" />
         </div>
       </div>
       <div className="right">

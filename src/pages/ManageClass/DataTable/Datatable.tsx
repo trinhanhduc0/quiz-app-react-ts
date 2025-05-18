@@ -20,7 +20,7 @@ const ClassCard: React.FC<ClassCardProps> = ({ classData, onClick }) => {
   return (
     <div
       onClick={onClick}
-      className="w-64 h-64 m-3 p-4 bg-purple-800 hover:bg-purple-700 cursor-pointer rounded-2xl shadow-lg transition-transform transform hover:scale-105 flex flex-col justify-between"
+      className="w-64 h-auto m-3 p-4 bg-purple-500 hover:bg-purple-800 cursor-pointer rounded-2xl shadow-lg transition-transform transform hover:scale-105 flex flex-col justify-between"
     >
       {/* Tên lớp học */}
       <h2 className="text-xl font-semibold text-white text-center mb-2 truncate">

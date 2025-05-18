@@ -16,6 +16,7 @@ export default function QuestionMultiUploader({
   imageUrl,
   onChange,
 }: QuestionMultiUploaderProps) {
+  console.log(formData);
   const [isModalImageOpen, setIsModalImageOpen] = useState(false);
   const [isQuestionImageOpen, setIsQuestionImageOpen] = useState<number | null>(null);
 
@@ -68,7 +69,7 @@ export default function QuestionMultiUploader({
         {formData.options?.map((option, index) => (
           <div key={index} className="border rounded-md p-4 space-y-2">
             <textarea
-              value={option.text}
+              value={option.text ?? ''}
               onChange={(e) => {
                 const newOptions = formData.options.map((opt, i) =>
                   i === index ? { ...opt, text: e.target.value } : opt,
@@ -83,7 +84,7 @@ export default function QuestionMultiUploader({
             {/* Image URL */}
             <div className="flex items-center gap-2">
               <input
-                value={option.image_url}
+                value={option.image_url ?? ''}
                 disabled
                 className="block w-full border border-gray-300 rounded-md p-2"
                 placeholder="Image URL"
@@ -124,10 +125,11 @@ export default function QuestionMultiUploader({
             <div className="flex items-center gap-2">
               <input
                 type="checkbox"
-                checked={option.is_correct}
+                checked={option.iscorrect ?? false}
                 onChange={(e) => {
-                  const newOptions = [...formData.options];
-                  newOptions[index].is_correct = e.target.checked;
+                  const newOptions = formData.options.map((opt, i) =>
+                    i === index ? { ...opt, iscorrect: e.target.checked } : opt,
+                  );
                   setFormData({ ...formData, options: newOptions });
                 }}
                 className="h-4 w-4"
@@ -155,7 +157,7 @@ export default function QuestionMultiUploader({
           onClick={() =>
             setFormData({
               ...formData,
-              options: [...formData.options, { text: '', image_url: '', is_correct: false }],
+              options: [...formData.options, { text: '', image_url: '', iscorrect: false }],
             })
           }
           className="flex items-center gap-2 border border-dashed border-blue-500 text-blue-500 px-4 py-2 rounded-md w-full hover:bg-blue-50"

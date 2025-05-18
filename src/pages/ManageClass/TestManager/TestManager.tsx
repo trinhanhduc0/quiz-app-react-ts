@@ -55,20 +55,10 @@ export default function TestManagement({ formData, setFormData, navigate }: Prop
   const tags: string[] = [
     ...new Set([
       ...allTests.flatMap((test) => test.tags || []),
-      // ...formData.test.flatMap((test) => test.tags || []),
+      ...formData.test.flatMap((test) => test.tags || []),
     ]),
   ].filter(Boolean);
 
-  //Không biết làm như thế nào, bây giờ muốn sửa luôn vào formData nhưng nếu qua setFormTestData thì không được, hãy tối ưu hóa và clean code đi
-
-  // const handleOpenModal = (testData?: TestFormData | null) => {
-  //   setIsEditing(!!testData);
-  //   const matchedTest = formData.test.find((test) => test._id === testData?._id);
-  //   setIsTestSelected(!!matchedTest);
-  //   const newTest: TestFormData = matchedTest ? matchedTest : { ...initValue, _id: '' };
-  //   setFormTestData(newTest);
-  //   setIsOpenTestModel(true);
-  // };
   const handleOpenModal = (testData?: TestFormData | null) => {
     setIsEditing(!!testData);
     if (testData) {
@@ -146,35 +136,6 @@ export default function TestManagement({ formData, setFormData, navigate }: Prop
     }
   }, [hasMoreQuestions, statusQuestion, dispatch, navigate]);
 
-  // const handleSubmit = useCallback(async () => {
-  //   const isValid = formTestData.test_name && formTestData.duration_minutes > 0;
-  //   if (!isValid) return alert('Vui lòng điền đầy đủ thông tin bài kiểm tra.');
-
-  //   const values: TestFormData = {
-  //     ...formTestData,
-  //     start_time: formTestData.start_time ? new Date(formTestData.start_time).toISOString() : '',
-  //     end_time: formTestData.end_time ? new Date(formTestData.end_time).toISOString() : '',
-  //   };
-
-  //   // Đảm bảo giá trị _id là hợp lệ
-  //   const testToSave = { ...values, _id: formTestData._id || generateObjectId() };
-
-  //   try {
-  //     if (isEditing) {
-  //       await dispatch(saveTest({ values: testToSave, navigate }));
-  //       alert('Đã cập nhật bài kiểm tra!');
-  //     } else {
-  //       await dispatch(createTest({ values: testToSave, navigate }));
-  //       alert('Đã tạo bài kiểm tra!');
-  //     }
-  //     setIsOpenTestModel(false);
-  //     setFormTestData(initValue);
-  //   } catch (error) {
-  //     console.error('Lỗi khi lưu bài kiểm tra:', error);
-  //     alert('Có lỗi xảy ra khi lưu bài kiểm tra');
-  //   }
-  // }, [dispatch, isEditing, formTestData, navigate]);
-
   const handleDeleteTest = (id: string) => {
     if (!window.confirm('Are you sure you want to delete this test?')) return;
 
@@ -211,17 +172,6 @@ export default function TestManagement({ formData, setFormData, navigate }: Prop
       test: isSelected ? prev.test.filter((t) => t._id !== test._id) : [...prev.test, test],
     }));
   };
-  // const convertTestToFormData = (test: Test): TestFormData => ({
-  //   _id: test._id,
-  //   test_name: test.test_name,
-  //   descript: test.descript,
-  //   duration_minutes: test.duration_minutes,
-  //   start_time: test.start_time,
-  //   end_time: test.end_time,
-  //   is_test: test.is_test,
-  //   tags: test.tags,
-  //   question_ids: test.question_ids,
-  // });
 
   return (
     <div className="max-w-3xl mx-auto p-2 bg-white shadow-md rounded-lg">

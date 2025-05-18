@@ -65,9 +65,7 @@ export const fetchQuestions = createAsyncThunk<
     }
     const endpoint = `${LINK}?page=${page}&limit=${limit}`;
     const response = await apiCallGet<Question[]>(endpoint, navigate);
-    if (!Array.isArray(response)) {
-      return rejectWithValue('Invalid response format');
-    }
+    console.log(response);
     return { data: response };
   } catch (error: any) {
     return rejectWithValue(error?.message || 'Failed to fetch questions');
@@ -79,6 +77,7 @@ export const createQuestion = createAsyncThunk<Question, Question, { rejectValue
   async (newQuestion, { rejectWithValue }) => {
     try {
       const response = await apiCallPost<Question>(LINK, newQuestion);
+      console.log(response);
       return response;
     } catch (error: any) {
       return rejectWithValue(error?.message || 'Failed to create question');

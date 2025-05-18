@@ -6,10 +6,7 @@ import TokenService from '~/services/TokenService';
 const Logout: FC = () => {
   const navigate = useNavigate();
 
-  useEffect(() => {
-    TokenService.removeToken(); // Remove token
-    navigate('/login'); // Redirect to login page
-  }, [navigate]);
+  useEffect(() => {}, [navigate]);
 
   return null; // No UI needed for this component
 };

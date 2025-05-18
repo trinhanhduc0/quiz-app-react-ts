@@ -182,11 +182,11 @@ function ManageClass() {
 
   return (
     <div className="max-w-5xl mx-auto p-6">
-      <h2 className="text-2xl font-semibold text-gray-800 text-center border-b-2 border-indigo-500 pb-2 mb-6">
+      <h2 className="text-2xl font-semibold text-gray-800  border-b-2 border-indigo-500 pb-2 mb-6">
         Manage Class
       </h2>
 
-      {allClass.length !== 0 && <ClassList data={allClass} onClick={handleEditClass} />}
+      {allClass && allClass.length !== 0 && <ClassList data={allClass} onClick={handleEditClass} />}
 
       <div className="mt-4">
         <button
@@ -277,7 +277,7 @@ function ManageClass() {
                     <label className="block text-sm font-medium text-gray-700">
                       Accepted Students
                     </label>
-                    <div className="space-y-2 max-h-32 overflow-y-auto">
+                    <div className="space-y-2 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
                       {formData.students_accept.map((email) => (
                         <div
                           key={email}
@@ -322,7 +322,16 @@ function ManageClass() {
               )}
             </div>
 
-            <div className="flex justify-end gap-2 border-t pt-4 sticky bottom-0 bg-white p-4">
+            <div className="flex justify-around gap-2 border-t pt-4 sticky bottom-0 bg-white py-5">
+              {isEditing && (
+                <button
+                  type="button"
+                  onClick={() => handleDelete({ _id: formData._id })}
+                  className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition"
+                >
+                  Delete
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
@@ -337,15 +346,6 @@ function ManageClass() {
               >
                 Save
               </button>
-              {isEditing && (
-                <button
-                  type="button"
-                  onClick={() => handleDelete({ _id: formData._id })}
-                  className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition"
-                >
-                  Delete
-                </button>
-              )}
             </div>
           </div>
         </div>

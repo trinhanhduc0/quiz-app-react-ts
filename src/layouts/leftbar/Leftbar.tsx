@@ -54,21 +54,23 @@ const LeftBar: FC<RightBarProps> = ({ isOpen, toggle }) => {
 
   const showModal = () => setIsModalVisible(true);
   const handleCancel = () => setIsModalVisible(false);
+
   const handleOk = () => {
-    TokenService.removeToken();
     navigate('/login');
   };
 
   return (
     <div
-      className={` fixed top-0 left-0 h-full w-64 bg-gradient-to-b from-blue-950 to-gray-900 text-white shadow-xl transition-transform duration-300 ease-in-out z-50 ${
+      className={` fixed top-0 left-0 h-full w-64 bg-gradient-to-b from-blue-400 to-gray-900 text-white shadow-xl transition-transform duration-300 ease-in-out z-50 ${
         isOpen ? 'translate-x-0' : '-translate-x-full'
       }`}
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-4 border-b border-blue-800">
         <Link to="/dashboard" className="text-2xl font-bold text-blue-300 hover:text-white">
-          QUIZ APP
+          <div className="logo" onClick={() => navigate('/dashboard')} role="button">
+            <img className="h-[auto] w-[150px] p-2 " src="/logo.png" alt="" />
+          </div>
         </Link>
         <ToggleButton onClickButton={toggle} />
       </div>

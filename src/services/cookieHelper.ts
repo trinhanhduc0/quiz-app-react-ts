@@ -3,13 +3,12 @@
  */
 export const setCookieWithExpiry = (setCookie, key, value, options = {}) => {
   const defaultOptions = {
-    path: "/",
+    path: '/',
     ...options,
   };
 
   // Stringify the value if it's an object or array
-  const valueToStore =
-    typeof value === "object" ? JSON.stringify(value) : value;
+  const valueToStore = typeof value === 'object' ? JSON.stringify(value) : value;
 
   setCookie(key, valueToStore, defaultOptions);
 };

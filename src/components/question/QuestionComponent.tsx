@@ -20,32 +20,32 @@ export type Answer =
   | {
       type: 'fill_in_the_blank';
       answer: FillInTheBlankAnswer;
-      id?: string;
-      fill_in_the_blanks?: FillInTheBlank[];
+      id: string;
+      fill_in_the_blanks: FillInTheBlank[];
     }
   | {
       type: 'single_choice_question';
       answer: MultipleChoiceAnswer;
-      id?: string;
+      id: string;
       fill_in_the_blanks?: any[];
-      options?: any[];
+      options: any[];
     }
   | {
       type: 'multiple_choice_question';
       answer: MultipleChoiceAnswer;
-      id?: string;
+      id: string;
       options?: any[];
     }
   | {
       type: 'order_question';
       answer: OrderAnswer;
-      id?: string;
+      id: string;
       order_items?: OrderItem[];
     }
   | {
       type: 'match_choice_question';
       answer: MatchAnswer;
-      id?: string;
+      id: string;
       match_items: MatchItem[];
       match_options: MatchOption[];
     };
@@ -71,7 +71,7 @@ const QuestionComponent: React.FC<QuestionBaseProps> = ({
   const handleAnswerChange = (questionType: string, updatedAnswer: any) => {
     // Create the properly typed Answer object based on question type
     let typedAnswer: Answer;
-
+    console.log(updatedAnswer);
     switch (questionType) {
       case 'fill_in_the_blank':
         typedAnswer = {

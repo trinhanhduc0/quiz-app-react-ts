@@ -1,14 +1,8 @@
-import TokenService from './TokenService';
+// utils/api.ts
+import { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { NavigateFunction } from 'react-router-dom';
+import axiosInstance from './axiosInstance';
 
-/**
- * General API call utility function
- * @param endpoint Endpoint to make the request to
- * @param method HTTP method (GET, POST, PUT, DELETE)
- * @param body Data to be sent in the request body (for POST/PUT requests)
- * @param navigate Optional navigation function to handle redirection (e.g., on token expiration)
- * @returns JSON response
- */
 const apiCall = async <T = any>(
   endpoint: string,
   method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
@@ -16,149 +10,57 @@ const apiCall = async <T = any>(
   navigate?: NavigateFunction,
 ): Promise<T> => {
   try {
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${TokenService.getToken() ?? ''}`,
-    };
-
-    const options: RequestInit = {
+    const config: AxiosRequestConfig = {
+      url: endpoint,
       method,
-      headers,
+      data: body,
     };
 
-    if (body) {
-      console.log(body);
-      options.body = JSON.stringify(body);
-    }
-    const response = await fetch(endpoint, options);
-    if (!response.ok) {
-      const errorBody = await response.text();
-      if (response.status === 401 && navigate) {
-        navigate('/login'); // or '/logout' based on your application flow
-      }
-      throw new Error(`HTTP error! Status: ${response.status} - ${errorBody}`);
-    }
-    const text = await response.text();
-
-    if (!text) {
-      return {} as T; // hoặc `null`, hoặc `undefined` tùy ứng dụng
+    const response: AxiosResponse<T> = await axiosInstance(config);
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.status === 401 && navigate) {
+      navigate('/login');
     }
 
-    try {
-      return JSON.parse(text) as T;
-    } catch (parseError) {
-      console.error('Failed to parse JSON response:', parseError);
-      throw new Error('Invalid JSON response');
-    }
-  } catch (error) {
-    console.error(`API call failed for ${method} ${endpoint}:`, error);
-    throw error; // rethrowing the error for further handling
+    const message = error.response?.data?.message || error.message;
+    console.error(`API error: ${message}`, error);
+    throw new Error(message);
   }
 };
+export const apiCallGet = <T>(url: string, navigate?: NavigateFunction) =>
+  apiCall<T>(url, 'GET', undefined, navigate);
 
-/**
- * Utility function for GET API calls
- * @param url The API endpoint for the GET request
- * @param navigate Optional navigation function for redirection on errors
- * @returns JSON response
- */
-export const apiCallGet = async <T>(url: string, navigate?: NavigateFunction): Promise<T> => {
-  return apiCall<T>(url, 'GET', undefined, navigate);
-};
+export const apiCallPost = <T>(url: string, body: any, navigate?: NavigateFunction) =>
+  apiCall<T>(url, 'POST', body, navigate);
 
-/**
- * Utility function for POST API calls
- * @param url The API endpoint for the POST request
- * @param body The request body for the POST method
- * @param navigate Optional navigation function for redirection on errors
- * @returns JSON response
- */
-export const apiCallPost = async <T>(
-  url: string,
-  body: any,
-  navigate?: NavigateFunction,
-): Promise<T> => {
-  return apiCall<T>(url, 'POST', body, navigate);
-};
+export const apiCallPut = <T>(url: string, body: any, navigate?: NavigateFunction) =>
+  apiCall<T>(url, 'PUT', body, navigate);
 
-/**
- * Utility function for PUT API calls
- * @param url The API endpoint for the PUT request
- * @param body The request body for the PUT method
- * @param navigate Optional navigation function for redirection on errors
- * @returns JSON response
- */
-export const apiCallPut = async <T>(
-  url: string,
-  body: any,
-  navigate?: NavigateFunction,
-): Promise<T> => {
-  return apiCall<T>(url, 'PUT', body, navigate);
-};
+export const apiCallDelete = <T>(url: string, body: any, navigate?: NavigateFunction) =>
+  apiCall<T>(url, 'DELETE', body, navigate);
 
-/**
- * Utility function for DELETE API calls
- * @param url The API endpoint for the DELETE request
- * @param body The request body for the DELETE method
- * @param navigate Optional navigation function for redirection on errors
- * @returns JSON response
- */
-export const apiCallDelete = async <T>(
-  url: string,
-  body: any,
-  navigate?: NavigateFunction,
-): Promise<T> => {
-  return apiCall<T>(url, 'DELETE', body, navigate);
-};
+export const apiCallPatch = <T>(url: string, body: any, navigate?: NavigateFunction) =>
+  apiCall<T>(url, 'PATCH', body, navigate);
 
-/**
- * Utility function for DELETE API calls
- * @param url The API endpoint for the DELETE request
- * @param body The request body for the DELETE method
- * @param navigate Optional navigation function for redirection on errors
- * @returns JSON response
- */
-export const apiCallPatch = async <T>(
-  url: string,
-  body: any,
-  navigate?: NavigateFunction,
-): Promise<T> => {
-  return apiCall<T>(url, 'PATCH', body, navigate);
-};
-
-/**
- * Utility function for uploading images (multipart/form-data)
- * @param endpoint The API endpoint for the upload
- * @param formData Form data containing the file to upload
- * @param navigate Optional navigation function for redirection on errors
- * @returns Response object from the API
- */
 export const apiUploadImage = async (
   endpoint: string,
   formData: FormData,
   navigate?: NavigateFunction,
-): Promise<Response> => {
+): Promise<any> => {
   try {
-    const response = await fetch(endpoint, {
-      method: 'POST',
+    const response = await axiosInstance.post(endpoint, formData, {
       headers: {
-        Authorization: `Bearer ${TokenService.getToken() ?? ''}`,
+        'Content-Type': 'multipart/form-data',
       },
-      body: formData,
     });
 
-    if (!response.ok) {
-      if (response.status === 401 && navigate) {
-        navigate('/login');
-      }
-      const errorBody = await response.text();
-      console.error('Upload error response:', errorBody);
-      throw new Error(`Upload failed. Status: ${response.status}`);
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.status === 401 && navigate) {
+      navigate('/login');
     }
-
-    return response;
-  } catch (error) {
     console.error('Upload image error:', error);
-    throw error;
+    throw new Error(error.message);
   }
 };

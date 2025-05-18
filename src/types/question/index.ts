@@ -2,11 +2,11 @@ export interface Question {
   _id: string;
   type?: string;
   question_content: QuestionContent;
-  metadata?: Metadata;
+  metadata: Metadata;
   tags?: string[];
   score?: number;
-  created_at?: string; // ISO string from Go's time.Time
-  updated_at?: string;
+  // created_at?: string; // ISO string from Go's time.Time
+  // updated_at?: string;
   suggestion?: string[];
 
   // Polymorphic fields
@@ -26,7 +26,7 @@ export interface QuestionContent {
 }
 
 export interface Metadata {
-  author?: string;
+  author: string;
 }
 
 export interface Option {

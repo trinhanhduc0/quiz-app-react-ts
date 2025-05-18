@@ -9,7 +9,7 @@ const ToggleButton: React.FC<ToggleButtonProps> = ({ onClickButton }) => {
   return (
     <div className="button-navigate">
       <button className="toggle-btn" onClick={onClickButton}>
-        <span className="middle-bar"></span>
+        <span className="middle-bar bg-blue-400 "></span>
       </button>
     </div>
   );

@@ -5,22 +5,16 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import API_ENDPOINTS from '~/config';
-import { apiCallPost } from '~/services/apiCallService';
 import QuestionComponent, { type Answer } from '~/components/question/QuestionComponent';
 import type { QuestionAnswer, TestAnswer } from '~/types/quiz';
 import { FillInTheBlank, MatchItem, OrderItem, Question } from '~/types/question';
+import { apiCallPost } from '~/services/apiCallService';
 
 interface CountdownTime {
   hours: number;
   minutes: number;
   seconds: number;
 }
-
-// interface Question {
-//   _id: string;
-//   score?: number;
-//   type: string;
-// }
 
 interface InfoTest {
   isDone?: boolean;
@@ -80,9 +74,9 @@ const DoTest: React.FC = () => {
     });
   };
 
-  const handleCurrentQuestionAnswerChange = (answer: Answer) => {
+  function handleCurrentQuestionAnswerChange(answer: Answer) {
     handleAnswerChange(currentQuestion._id, answer);
-  };
+  }
 
   const apiSendTest = async () => {
     const filteredAnswers = Object.entries(answers).reduce(
@@ -103,14 +97,8 @@ const DoTest: React.FC = () => {
       question_answer: filteredAnswers,
     };
 
-    console.log(testAnswer);
-
     try {
       const res = await apiCallPost(API_ENDPOINTS.SENDTEST, testAnswer, navigate);
-      localStorage.removeItem(questionCache);
-      localStorage.removeItem(answerCache);
-      localStorage.removeItem(`test_end_time_${testId}`);
-      localStorage.removeItem(startTimeCache);
       return res;
     } catch (error) {
       console.log(error);
@@ -127,6 +115,11 @@ const DoTest: React.FC = () => {
         await apiSendTest();
         setSaveStatus('saved');
         alert('Nộp bài thành công!');
+        localStorage.removeItem(questionCache);
+        localStorage.removeItem(answerCache);
+        localStorage.removeItem(`test_end_time_${testId}`);
+        localStorage.removeItem(startTimeCache);
+        window.location.reload();
       } catch {
         setSaveStatus('error');
         alert('Đã có lỗi xảy ra khi nộp bài. Vui lòng thử lại.');
@@ -293,7 +286,7 @@ const DoTest: React.FC = () => {
 
     fetchQuestions();
     return () => timerCleanup?.();
-  }, [testId, author, isTest, classId, navigate]);
+  }, [testId, author, isTest, classId, answers]);
 
   const totalScore = questions.reduce((sum, q) => sum + (q.score || 0), 0);
   const currentQuestion = questions[currentQuestionIndex];
@@ -348,12 +341,11 @@ const DoTest: React.FC = () => {
         </div>
       )}
 
-      {/* Kết quả sau khi làm bài */}
-      {isDone && (
+      {isDone ? (
         <div className="text-green-700 font-semibold text-xl text-center">
           Điểm: {score}/{totalScore}
         </div>
-      )}
+      ) : null}
 
       {currentQuestion ? (
         <div>
@@ -368,7 +360,6 @@ const DoTest: React.FC = () => {
         </div>
       ) : null}
 
-      {/* Điều hướng câu hỏi */}
       <div className="flex justify-between mt-6">
         <button
           onClick={() => setCurrentQuestionIndex((i) => Math.max(i - 1, 0))}
@@ -390,7 +381,7 @@ const DoTest: React.FC = () => {
           Câu tiếp <ChevronRight className="ml-2" />
         </button>
       </div>
-      {console.log(isDone, isTest)}
+
       {(isDone || isTest !== 'true') && (
         <div className="flex justify-center items-center">
           <button

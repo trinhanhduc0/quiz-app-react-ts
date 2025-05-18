@@ -35,7 +35,7 @@ const ManageQuestion: React.FC = () => {
       );
     }
 
-    return <QuestionTable questions={Object.values(questionsByPage).flat()}  />;
+    return <QuestionTable questions={Object.values(questionsByPage).flat()} />;
   };
 
   return (

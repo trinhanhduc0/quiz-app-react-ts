@@ -125,11 +125,11 @@ export default function QuestionSingleForm({
               <input
                 type="radio"
                 name="correct-option"
-                checked={option.is_correct}
+                checked={option.iscorrect}
                 onChange={() => {
                   const newOptions = formData.options.map((opt, i) => ({
                     ...opt,
-                    is_correct: i === index,
+                    iscorrect: i === index,
                   }));
                   setFormData({ ...formData, options: newOptions });
                 }}
@@ -158,7 +158,7 @@ export default function QuestionSingleForm({
           onClick={() =>
             setFormData({
               ...formData,
-              options: [...formData.options, { text: '', image_url: '', is_correct: false }],
+              options: [...formData.options, { text: '', image_url: '', iscorrect: false }],
             })
           }
           className="flex items-center gap-2 border border-dashed border-blue-500 text-blue-500 px-4 py-2 rounded-md w-full hover:bg-blue-50"
