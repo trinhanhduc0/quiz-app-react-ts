@@ -17,7 +17,7 @@ const Rightbar: FC<RightBarProps> = ({ isOpen, toggle }) => {
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isLanguageDropdownOpen, setLanguageDropdownOpen] = useState(false);
-  const languageDropdownRef = useRef<HTMLDivElement | null>(null);
+  const rightbarRef = useRef<HTMLDivElement | null>(null);
 
   const menuItems = [
     { to: '/dashboard', icon: LayoutDashboard, label: t('leftbar.dashboard') },
@@ -31,26 +31,21 @@ const Rightbar: FC<RightBarProps> = ({ isOpen, toggle }) => {
     { code: 'vi', label: 'Tiếng Việt' },
   ];
 
-  const toggleLanguageDropdown = useCallback(() => {
-    setLanguageDropdownOpen((prev) => !prev);
-  }, []);
+  const toggleLanguageDropdown = () => setLanguageDropdownOpen((prev) => !prev);
 
-  const changeLanguage = useCallback(
-    (lng: string) => {
-      i18n.changeLanguage(lng);
-      setLanguageDropdownOpen(false);
+  const changeLanguage = (lng: string) => {
+    i18n.changeLanguage(lng);
+    setLanguageDropdownOpen(false);
+  };
+
+  const handleClickOutside = useCallback(
+    (event: MouseEvent) => {
+      if (rightbarRef.current && !rightbarRef.current.contains(event.target as Node)) {
+        toggle(); // Chỉ toggle khi click ra ngoài Rightbar
+      }
     },
-    [i18n],
+    [toggle],
   );
-
-  const handleClickOutside = useCallback((event: MouseEvent) => {
-    if (
-      languageDropdownRef.current &&
-      !languageDropdownRef.current.contains(event.target as Node)
-    ) {
-      setLanguageDropdownOpen(false);
-    }
-  }, []);
 
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
@@ -61,66 +56,72 @@ const Rightbar: FC<RightBarProps> = ({ isOpen, toggle }) => {
   const handleCancel = () => setIsModalVisible(false);
 
   const handleOk = () => {
-    TokenService.removeToken();
     navigate('/login');
   };
 
   return (
     <div
-      className={`fixed top-0 left-0 h-full bg-gray-900 text-white transition-transform duration-300 ease-in-out ${
-        isOpen ? 'translate-x-0' : '-translate-x-full'
-      } w-64 z-50 shadow-lg`}
+      ref={rightbarRef}
+      className={`fixed top-0 right-0 h-full w-64 bg-gray-100 text-gray-800 shadow-md transition-transform duration-300 ease-in-out z-50 rounded-l-lg border-l border-gray-300 ${
+        isOpen ? 'translate-x-0' : 'translate-x-full'
+      }`}
+      style={{
+        boxShadow: 'inset -5px 0 10px -5px rgba(0,0,0,0.1), 3px 0 10px -3px rgba(0,0,0,0.05)',
+        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+      }}
     >
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-700">
-        <Link to="/dashboard" className="text-2xl font-bold hover:text-blue-400 transition-colors">
-          QUIZ APP
+      <div className="flex justify-between px-4 ">
+        <Link to="/dashboard" className="text-2xl font-bold text-blue-300 hover:text-white">
+          <div className="logo" onClick={() => navigate('/dashboard')} role="button">
+            <img className="h-[auto] w-[150px] p-2 " src="/logo.png" alt="" />
+          </div>
         </Link>
         <ToggleButton onClickButton={toggle} />
       </div>
 
-      {/* Navigation */}
-      <ul className="flex flex-col gap-2 p-4">
-        {menuItems.map(({ to, icon: Icon, label }) => (
-          <li key={to}>
-            <Link
-              to={to}
-              onClick={toggle}
-              className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 ${
-                location.pathname === to
-                  ? 'bg-blue-600 text-white'
-                  : 'hover:bg-gray-700 text-gray-200'
-              }`}
-            >
-              <Icon className="w-5 h-5" />
-              <span>{label}</span>
-            </Link>
-          </li>
-        ))}
+      {/* Menu Items */}
+      <ul className="mt-4 px-3 space-y-1">
+        {menuItems.map(({ to, icon: Icon, label }) => {
+          const isActive = location.pathname === to;
+          return (
+            <li key={to}>
+              <Link
+                to={to}
+                onClick={toggle}
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                  isActive
+                    ? 'bg-blue-700 text-white shadow-md'
+                    : 'text-blue-400 hover:bg-gray-800 hover:text-white'
+                }`}
+              >
+                <Icon className="w-5 h-5" />
+                <span className="text-sm font-medium">{label}</span>
+              </Link>
+            </li>
+          );
+        })}
 
         {/* Language Dropdown */}
-        <li className="relative">
+        <li className="relative mt-2">
           <div
             onClick={toggleLanguageDropdown}
-            className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 text-gray-200 cursor-pointer transition-all duration-200"
+            className="flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer text-gray-300 hover:bg-gray-800 hover:text-white transition"
           >
             <Languages className="w-5 h-5" />
-            <span>Language</span>
+            <span className="text-sm">Language</span>
           </div>
 
           {isLanguageDropdownOpen && (
-            <div
-              ref={languageDropdownRef}
-              className="absolute left-4 top-full mt-2 w-48 bg-gray-800 rounded-lg shadow-lg z-10 origin-top animate-dropdown"
-            >
+            <div className="absolute left-4 mt-2 w-48 bg-gray-800 rounded-md shadow-lg z-20 overflow-hidden border border-gray-700">
               {languageOptions.map(({ code, label }) => (
                 <div
                   key={code}
                   onClick={() => changeLanguage(code)}
-                  className="flex items-center gap-2 p-3 hover:bg-gray-700 text-gray-200 cursor-pointer transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 hover:bg-gray-700 cursor-pointer text-sm text-gray-200"
                 >
                   {i18n.language === code && <Check className="w-4 h-4 text-green-400" />}
-                  <span>{label}</span>
+                  {label}
                 </div>
               ))}
             </div>
@@ -128,37 +129,37 @@ const Rightbar: FC<RightBarProps> = ({ isOpen, toggle }) => {
         </li>
       </ul>
 
-      {/* Logout */}
-      <div className="absolute bottom-4 left-4">
+      {/* Logout Button */}
+      <div className="absolute bottom-6 left-4 w-[calc(100%-2rem)]">
         <button
           onClick={showModal}
-          className="flex items-center gap-3 p-3 rounded-lg hover:bg-red-600 text-gray-200 transition-all duration-200"
+          className="flex w-full items-center gap-3 px-4 py-3 rounded-lg bg-red-600 hover:bg-red-700 text-white transition"
         >
           <LogOut className="w-5 h-5" />
-          <span>{t('leftbar.logout')}</span>
+          <span className="text-sm font-medium">{t('leftbar.logout')}</span>
         </button>
       </div>
 
       {/* Logout Modal */}
       {isModalVisible && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-sm shadow-xl animate-modal">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-[90%] max-w-sm text-center">
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">
               {t('leftbar.logout_confirm_title')}
             </h3>
             <p className="text-gray-600 mb-6">{t('leftbar.logout_comfirm')}</p>
-            <div className="flex gap-4 justify-end">
-              <button
-                onClick={handleOk}
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-all"
-              >
-                Yes
-              </button>
+            <div className="flex justify-end gap-3">
               <button
                 onClick={handleCancel}
-                className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-all"
+                className="px-4 py-2 rounded-md bg-gray-200 hover:bg-gray-300 text-gray-700"
               >
-                No
+                {t('No') || 'No'}
+              </button>
+              <button
+                onClick={handleOk}
+                className="px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                {t('Yes') || 'Yes'}
               </button>
             </div>
           </div>
