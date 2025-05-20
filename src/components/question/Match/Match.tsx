@@ -55,13 +55,12 @@ const SortableMatch: React.FC<{
       {...attributes}
       {...listeners}
       style={style}
-      className={`p-2 ${bgColor} rounded-md shadow text-center font-medium cursor-pointer`}
+      className={`p-2 ${bgColor} m-1 rounded-md shadow text-center font-medium cursor-pointer`}
     >
       {content}
     </div>
   );
 };
-
 const DroppableBox: React.FC<{
   id: string;
   children: React.ReactNode;
@@ -71,11 +70,13 @@ const DroppableBox: React.FC<{
   return (
     <div
       ref={setNodeRef}
-      className={`min-h-[60px] border p-2 rounded-md ${
+      className={`flex flex-wrap min-h-[60px] border p-2 rounded-md ${
         isOver ? 'bg-green-50' : 'bg-gray-100'
       } space-y-2 transition-all`}
     >
       {children}
+      {/* Add an empty div to increase drop area */}
+      <div className="min-h-[32px]" />
     </div>
   );
 };

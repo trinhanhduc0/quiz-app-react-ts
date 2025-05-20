@@ -68,10 +68,7 @@ const OrderQuestion: React.FC<OrderQuestionProps> = ({
 }) => {
   const getInitialItems = (): OrderItem[] => {
     if (showAnswer) {
-      const correctIds = order_items.map((item) => item.id ?? '');
-      return [...order_items].sort(
-        (a, b) => correctIds.indexOf(a.id as string) - correctIds.indexOf(b.id as string),
-      );
+      return [...order_items].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
     }
     console.log(order_items);
     if (answer && answer.length > 0) {
@@ -102,10 +99,8 @@ const OrderQuestion: React.FC<OrderQuestionProps> = ({
     const oldIndex = items.findIndex((item) => item.id === active.id);
     const newIndex = items.findIndex((item) => item.id === over.id);
 
-    console.log('move', oldIndex, newIndex);
     const newItems = arrayMove(items, oldIndex, newIndex);
     setItems(newItems);
-    console.log(items, newItems);
 
     const itemIds = newItems.map((item) => item.id);
     const order_items = newItems.map((item) => ({ id: item.id }));

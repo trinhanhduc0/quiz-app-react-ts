@@ -286,7 +286,8 @@ const DoTest: React.FC = () => {
 
     fetchQuestions();
     return () => timerCleanup?.();
-  }, [testId, author, isTest, classId, answers]);
+    // }, [testId, author, isTest, classId, answers]);
+  }, []);
 
   const totalScore = questions.reduce((sum, q) => sum + (q.score || 0), 0);
   const currentQuestion = questions[currentQuestionIndex];
