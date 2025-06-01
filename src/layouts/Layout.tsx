@@ -6,23 +6,18 @@ import { useTopbar } from '~/context/TopbarContext';
 import './Layout.scss';
 
 const Layout: React.FC = () => {
-  const [isLeftbarOpen, setLeftbarOpen] = useState<boolean>(false);
   const [isRightbarOpen, setRightbarOpen] = useState<boolean>(false);
   const prevScrollY = useRef<number>(0);
 
   const { isHidden, setIsHidden } = useTopbar();
 
-  const toggleLeftbar = useCallback(() => {
-    setLeftbarOpen((prev) => !prev);
-  }, []);
-
   const toggleRightbar = useCallback(() => {
-    setRightbarOpen((prev) => !prev);
-  }, []);
+    setRightbarOpen(prev => !prev);
+  }, [isRightbarOpen]);
 
   useEffect(() => {
     const handleScroll = () => {
-      if (isLeftbarOpen) return;
+      if (isRightbarOpen) return;
 
       const currentScrollY = window.scrollY;
       const scrollDifference = 1;
@@ -54,7 +49,7 @@ const Layout: React.FC = () => {
     return () => {
       window.removeEventListener('scroll', debouncedHandleScroll);
     };
-  }, [isLeftbarOpen, setIsHidden]);
+  }, [setIsHidden]);
 
   return (
     <div className="min-h-screen flex flex-col">

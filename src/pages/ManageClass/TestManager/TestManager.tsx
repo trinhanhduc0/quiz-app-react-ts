@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import ManageTestModal, { TestFormData } from '../../ManageTest/ManageTestModal';
-import { fetchTests, createTest, deleteTest, saveTest } from '~/redux/test/testSlice';
+import { fetchTests, createTest, deleteTest, saveTest, resetTest } from '~/redux/test/testSlice';
 import { fetchQuestions, incrementPage } from '~/redux/question/questionSlice';
 import { generateObjectId } from '~/utils/objectId';
 import { RootState, AppDispatch } from '~/redux/store'; // đảm bảo bạn có các định nghĩa này
 import { NavigateFunction } from 'react-router-dom';
 import { ClassFormData } from '../ManageClass';
+import { toast } from 'react-toastify';
+import { apiCallGet } from '~/services/apiCallService';
 
 interface Test {
   _id: string;
@@ -74,7 +76,10 @@ export default function TestManagement({ formData, setFormData, navigate }: Prop
 
   const handleSubmit = async () => {
     const isValid = formTestData.test_name && formTestData.duration_minutes > 0;
-    if (!isValid) return alert('Vui lòng điền đầy đủ thông tin bài kiểm tra.');
+    if (!isValid) {
+      toast.error('Vui lòng điền đầy đủ thông tin bài kiểm tra.');
+      return;
+    }
 
     const updatedTest: TestFormData = {
       ...formTestData,
@@ -85,7 +90,6 @@ export default function TestManagement({ formData, setFormData, navigate }: Prop
 
     try {
       if (isTestSelected) {
-        // chỉnh local test trong formData
         setFormData((prev) => ({
           ...prev,
           test: prev.test.map((t) => (t._id === updatedTest._id ? updatedTest : t)),
@@ -93,21 +97,29 @@ export default function TestManagement({ formData, setFormData, navigate }: Prop
             ? prev.test_id
             : [...prev.test_id, updatedTest._id],
         }));
-        alert(isEditing ? 'Đã cập nhật bài kiểm tra lớp!' : 'Đã thêm bài kiểm tra lớp!');
+        toast.success(isEditing ? 'Đã cập nhật bài kiểm tra lớp!' : 'Đã thêm bài kiểm tra lớp!');
+        dispatch(resetTest({
+          values: {
+            class_id: formData._id ?? "",
+            test_id: updatedTest._id,  // thay bằng test_id thực tế
+          },
+          navigate
+        }));
       } else {
         if (isEditing) {
           await dispatch(saveTest({ values: updatedTest, navigate }));
-          alert('Đã cập nhật bài kiểm tra hệ thống!');
+          toast.success('Đã cập nhật bài kiểm tra hệ thống!');
         } else {
           await dispatch(createTest({ values: updatedTest, navigate }));
-          alert('Đã tạo bài kiểm tra mới!');
+          toast.success('Đã tạo bài kiểm tra mới!');
         }
       }
+
       setIsOpenTestModel(false);
       setFormTestData(initValue);
     } catch (error) {
       console.error('Lỗi khi lưu bài kiểm tra:', error);
-      alert('Có lỗi xảy ra khi lưu bài kiểm tra');
+      toast.error('Có lỗi xảy ra khi lưu bài kiểm tra');
     }
   };
 
@@ -204,11 +216,10 @@ export default function TestManagement({ formData, setFormData, navigate }: Prop
           <button
             key={tag || 'all'}
             onClick={() => setSelectedTag(tag)}
-            className={`px-3 py-1 text-sm font-medium rounded-md transition ${
-              selectedTag === tag
+            className={`px-3 py-1 text-sm font-medium rounded-md transition ${selectedTag === tag
                 ? 'bg-blue-600 text-white'
                 : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-            }`}
+              }`}
           >
             {tag || 'Tất cả'}
           </button>
@@ -225,9 +236,8 @@ export default function TestManagement({ formData, setFormData, navigate }: Prop
             return (
               <div
                 key={test._id}
-                className={`border p-4 rounded-md shadow-sm relative ${
-                  isSelected ? 'bg-blue-50 border-blue-400' : 'bg-gray-50'
-                } transition-all`}
+                className={`border p-4 rounded-md shadow-sm relative ${isSelected ? 'bg-blue-50 border-blue-400' : 'bg-gray-50'
+                  } transition-all`}
               >
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-semibold text-gray-800">{test.test_name}</h3>
@@ -254,11 +264,10 @@ export default function TestManagement({ formData, setFormData, navigate }: Prop
                 <div className="mt-3 flex justify-end gap-2">
                   <button
                     onClick={() => handleToggleSelectTest(test)}
-                    className={`px-3 py-1 text-sm rounded-md transition ${
-                      isSelected
+                    className={`px-3 py-1 text-sm rounded-md transition ${isSelected
                         ? 'bg-yellow-500 text-white hover:bg-yellow-600'
                         : 'bg-blue-500 text-white hover:bg-blue-600'
-                    }`}
+                      }`}
                   >
                     {isSelected ? 'Bỏ chọn' : 'Chọn'}
                   </button>

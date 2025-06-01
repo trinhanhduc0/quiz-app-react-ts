@@ -9,6 +9,8 @@ import QuestionComponent, { type Answer } from '~/components/question/QuestionCo
 import type { QuestionAnswer, TestAnswer } from '~/types/quiz';
 import { FillInTheBlank, MatchItem, OrderItem, Question } from '~/types/question';
 import { apiCallPost } from '~/services/apiCallService';
+import { time, timeEnd } from 'console';
+import { TfiReload } from "react-icons/tfi";
 
 interface CountdownTime {
   hours: number;
@@ -40,7 +42,7 @@ const DoTest: React.FC = () => {
   const questionCache = `questions_${testId}`;
   const answerCache = `quizAnswers_${testId}`;
   const startTimeCache = `test_start_time_${testId}`;
-
+  const endTimeCache = `test_end_time_${testId}`
   const [infoTest, setInfoTest] = useState<InfoTest | null>(null);
   const [countdownTime, setCountdownTime] = useState<CountdownTime>({
     hours: 0,
@@ -59,6 +61,17 @@ const DoTest: React.FC = () => {
   const [isDone, setIsDone] = useState<boolean>(false);
   const [showAnswer, setShowAnswer] = useState<boolean>(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
+
+  const resetTest = () => {
+    console.log("CLICK")
+
+    localStorage.removeItem(questionCache);
+    localStorage.removeItem(answerCache);
+    localStorage.removeItem(endTimeCache);
+    localStorage.removeItem(startTimeCache);
+
+    window.location.reload()
+  }
 
   const handleAnswerChange = (questionId: string, answer: Answer) => {
     setSaveStatus('saving');
@@ -117,7 +130,7 @@ const DoTest: React.FC = () => {
         alert('Nộp bài thành công!');
         localStorage.removeItem(questionCache);
         localStorage.removeItem(answerCache);
-        localStorage.removeItem(`test_end_time_${testId}`);
+        localStorage.removeItem(endTimeCache);
         localStorage.removeItem(startTimeCache);
         window.location.reload();
       } catch {
@@ -286,9 +299,8 @@ const DoTest: React.FC = () => {
 
     fetchQuestions();
     return () => timerCleanup?.();
-    // }, [testId, author, isTest, classId, answers]);
-  }, []);
-
+    }, [testId, author, isTest, classId, answers]);
+    
   const totalScore = questions.reduce((sum, q) => sum + (q.score || 0), 0);
   const currentQuestion = questions[currentQuestionIndex];
   const answeredCount = Object.keys(answers).length;
@@ -302,6 +314,7 @@ const DoTest: React.FC = () => {
     <div className="text-red-600 text-center p-6 text-lg">{error}</div>
   ) : (
     <div className="max-w-4xl mx-auto p-6 space-y-4">
+
       {/* Countdown and Progress */}
       {!isDone && (
         <div className="space-y-2">
@@ -382,8 +395,7 @@ const DoTest: React.FC = () => {
           Câu tiếp <ChevronRight className="ml-2" />
         </button>
       </div>
-
-      {(isDone || isTest !== 'true') && (
+      {(isTest !== 'true' || (isDone && isTest !== 'true')) && (
         <div className="flex justify-center items-center">
           <button
             onClick={handleShowAnswer}
@@ -392,6 +404,8 @@ const DoTest: React.FC = () => {
       `}
           >
             {showAnswer ? 'Ẩn đáp án' : 'Hiện đáp án'}
+          </button>
+          <button className='p-5' onClick={resetTest}><TfiReload />
           </button>
         </div>
       )}
@@ -407,12 +421,11 @@ const DoTest: React.FC = () => {
               key={q._id}
               onClick={() => setCurrentQuestionIndex(i)}
               className={`w-10 h-10 rounded-full flex items-center justify-center border 
-                ${
-                  currentQuestionIndex === i
-                    ? 'bg-blue-600 text-white'
-                    : hasAnswer
-                      ? 'bg-green-100 border-green-500'
-                      : 'bg-white hover:bg-gray-100'
+                ${currentQuestionIndex === i
+                  ? 'bg-blue-600 text-white'
+                  : hasAnswer
+                    ? 'bg-green-100 border-green-500'
+                    : 'bg-white hover:bg-gray-100'
                 }`}
             >
               {i + 1}

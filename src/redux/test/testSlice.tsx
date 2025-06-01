@@ -27,6 +27,16 @@ interface DeleteTestParams {
   navigate: NavigateFunction;
 }
 
+interface ResetTestData{
+  class_id: string;
+  test_id:string;
+}
+
+interface ResetTestParams{
+  values: ResetTestData,
+  navigate: NavigateFunction
+}
+
 interface SaveTestParams {
   values: TestFormData;
   navigate: NavigateFunction;
@@ -64,6 +74,13 @@ export const createTest = createAsyncThunk<TestFormData, CreateTestParams>(
   'tests/createTest',
   async ({ values, navigate }) => {
     return apiCallPost(LINK, values, navigate);
+  },
+);
+
+export const resetTest = createAsyncThunk<ResetTestData, ResetTestParams >(
+  'tests/resetTest',
+  async ({ values, navigate }) => {
+    return apiCallPost(API_ENDPOINTS.RESET_TEST, values, navigate);
   },
 );
 

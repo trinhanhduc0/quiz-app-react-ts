@@ -24,6 +24,11 @@ const MultipleChoiceQuestion: React.FC<Props> = ({
   showAnswer,
 }) => {
   const [selectedValues, setSelectedValues] = useState<string[]>([]);
+  useEffect(() => {
+    if (answer) {
+      setSelectedValues(answer);
+    }
+  }, [answer]);
 
   const handleCheckboxChange = (optionId: string) => {
     if (isDone || showAnswer) return;
@@ -45,10 +50,8 @@ const MultipleChoiceQuestion: React.FC<Props> = ({
   };
 
   const isChecked = (option: Option) => {
-    if (showAnswer) {
-      return option.iscorrect;
-    }
-    return answer?.includes(option.id as string);
+    if (showAnswer) return option.iscorrect;
+    return selectedValues.includes(option.id as string);
   };
 
   return (
@@ -72,9 +75,8 @@ const MultipleChoiceQuestion: React.FC<Props> = ({
           return (
             <label
               key={option.id}
-              className={`flex items-center p-2 border rounded-lg transition-all duration-300 cursor-pointer ${highlight} ${
-                isDone || showAnswer ? 'cursor-not-allowed opacity-70' : ''
-              }`}
+              className={`flex items-center p-2 border rounded-lg transition-all duration-300 cursor-pointer ${highlight} ${isDone || showAnswer ? 'cursor-not-allowed opacity-70' : ''
+                }`}
             >
               <input
                 type="checkbox"

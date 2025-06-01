@@ -40,8 +40,10 @@ const Rightbar: FC<RightBarProps> = ({ isOpen, toggle }) => {
 
   const handleClickOutside = useCallback(
     (event: MouseEvent) => {
-      if (rightbarRef.current && !rightbarRef.current.contains(event.target as Node)) {
-        toggle(); // Chỉ toggle khi click ra ngoài Rightbar
+      console.log(isOpen)
+      if (isOpen && rightbarRef.current && !rightbarRef.current.contains(event.target as Node)) {
+          toggle(); // Chỉ toggle khi click ra ngoài Rightbar
+
       }
     },
     [toggle],
@@ -70,14 +72,11 @@ const Rightbar: FC<RightBarProps> = ({ isOpen, toggle }) => {
         fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
       }}
     >
+      
       {/* Header */}
-      <div className="flex justify-between px-4 ">
-        <Link to="/dashboard" className="text-2xl font-bold text-blue-300 hover:text-white">
-          <div className="logo" onClick={() => navigate('/dashboard')} role="button">
-            <img className="h-[auto] w-[150px] p-2 " src="/logo.png" alt="" />
-          </div>
-        </Link>
-        <ToggleButton onClickButton={toggle} />
+      <div className="flex justify-end px-4 ">
+        {/* TOGGLE */}
+        <ToggleButton onClickButton={toggle} /> 
       </div>
 
       {/* Menu Items */}

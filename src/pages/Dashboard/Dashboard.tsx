@@ -49,6 +49,7 @@ const Dashboard: React.FC = () => {
         <button
           onClick={() => setIsJoinClassOpen(true)}
           className="open-join-class-button bg-blue-600 text-white hover:bg-blue-700 transition-all duration-300 py-2 px-4 rounded-lg shadow-lg transform hover:scale-105"
+          
         >
           {t('dashboard.join_class')}
         </button>

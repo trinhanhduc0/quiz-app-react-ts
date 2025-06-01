@@ -14,6 +14,7 @@ const API_ENDPOINTS = {
   SENDTEST: `${API_BASE_URL_DO_TEST}/answers/submit-test`,
 
   GETQUESTIONS: `${API_BASE_URL_DO_TEST}/class-test/get-question-of-test`,
+  RESET_TEST:`${API_BASE_URL_DO_TEST}/class-test/reset-class-test`,
 
   CLASSES: `${API_BASE_URL}/class`,
 

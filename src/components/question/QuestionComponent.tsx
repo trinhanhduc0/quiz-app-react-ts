@@ -5,11 +5,12 @@ import OrderQuestion from './Order/Order';
 import SingleChoiceQuestion from './single/Single';
 import { FillInTheBlank, MatchItem, MatchOption, OrderItem, Question } from '~/types/question';
 import MatchQuestion from './Match/Match';
+import { useEffect } from 'react';
 // import MatchQuestion from './Match/Match';
 
 export type FillInTheBlankAnswer = { [key: string]: string }; // Câu hỏi điền vào chỗ trống, ví dụ: { "67f805c2523b149f092198e8": "ngôn ngữ" }
 
-export type MultipleChoiceAnswer = string; // Câu hỏi trắc nghiệm nhiều lựa chọn, chỉ lưu id của đáp án đúng
+export type MultipleChoiceAnswer = string[]; // Câu hỏi trắc nghiệm nhiều lựa chọn, chỉ lưu id của đáp án đúng
 
 export type OrderAnswer = string[]; // Câu hỏi sắp xếp, lưu danh sách id của các lựa chọn
 
@@ -198,6 +199,8 @@ const QuestionComponent: React.FC<QuestionBaseProps> = ({
         return <div className="text-center text-red-500">Unsupported question type</div>;
     }
   };
+
+  console.log(question, answer)
 
   return (
     <div className="bg-white rounded-lg shadow-lg w-full max-w-4xl mx-auto my-4">
