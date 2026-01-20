@@ -77,8 +77,8 @@ export default function ListTest() {
     setError('');
     try {
       const result = await apiCallPost<TestItem[]>(
-        API_ENDPOINTS.GETTESTS,
-        { _id: classId },
+        API_ENDPOINTS.GET_TESTS_OF_CLASS,
+        { class_id: classId },
         navigate,
       );
       setTests(result);
@@ -94,8 +94,7 @@ export default function ListTest() {
   }, [fetchTests]);
 
   const handleStartTest = (testId: string, isTest: boolean) => {
-    console.log(testId);
-    navigate(`/do-test/${isTest}/${author}/${testId}/${classId}`);
+    navigate(`/do-test/${author}/${testId}/${classId}`);
   };
 
   const sensors = useSensors(useSensor(PointerSensor));
@@ -116,7 +115,7 @@ export default function ListTest() {
       {loading && <div className="text-center">Đang tải...</div>}
       {error && <div className="text-red-600 text-center">{error}</div>}
 
-      {!loading && !error && (
+      {!loading && !error && tests && (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={tests.map((t) => t._id)} strategy={verticalListSortingStrategy}>
             {tests.map((test) => (
@@ -124,7 +123,6 @@ export default function ListTest() {
                 key={test._id}
                 test={test}
                 onClick={() => {
-                  console.log(test);
                   handleStartTest(test._id, test.is_test);
                 }}
               />

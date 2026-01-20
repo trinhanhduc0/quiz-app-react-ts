@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Topbar from './topbar/Topbar';
 import Rightbar from './rightbar/Rightbar';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { useTopbar } from '~/context/TopbarContext';
 import './Layout.scss';
+import StudentProfileModal from '~/components/user/UserComponent';
 
 const Layout: React.FC = () => {
   const [isRightbarOpen, setRightbarOpen] = useState<boolean>(false);
@@ -11,59 +12,69 @@ const Layout: React.FC = () => {
 
   const { isHidden, setIsHidden } = useTopbar();
 
+
   const toggleRightbar = useCallback(() => {
     setRightbarOpen(prev => !prev);
   }, [isRightbarOpen]);
+  const location = useLocation();
 
   useEffect(() => {
-    const handleScroll = () => {
-      if (isRightbarOpen) return;
+    if (location.pathname == '/login')
+      setIsHidden(true)
+    else {
+      const handleScroll = () => {
+        if (isRightbarOpen) return;
 
-      const currentScrollY = window.scrollY;
-      const scrollDifference = 1;
+        const currentScrollY = window.scrollY;
+        const scrollDifference = 1;
 
-      if (currentScrollY > prevScrollY.current + scrollDifference) {
-        setIsHidden(true);
-      } else if (currentScrollY < prevScrollY.current - scrollDifference) {
-        setIsHidden(false);
-      }
+        if (currentScrollY > prevScrollY.current + scrollDifference) {
+          setIsHidden(true);
+        } else if (currentScrollY < prevScrollY.current - scrollDifference) {
+          setIsHidden(false);
+        }
 
-      if (currentScrollY === 0) {
-        setIsHidden(false);
-      }
+        if (currentScrollY === 0) {
+          setIsHidden(false);
+        }
 
-      prevScrollY.current = currentScrollY;
-    };
-
-    const debounce = (func: () => void, delay: number) => {
-      let timeoutId: NodeJS.Timeout;
-      return () => {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(func, delay);
+        prevScrollY.current = currentScrollY;
       };
-    };
 
-    const debouncedHandleScroll = debounce(handleScroll, 100);
+      const debounce = (func: () => void, delay: number) => {
+        let timeoutId: NodeJS.Timeout;
+        return () => {
+          clearTimeout(timeoutId);
+          timeoutId = setTimeout(func, delay);
+        };
+      };
 
-    window.addEventListener('scroll', debouncedHandleScroll);
-    return () => {
-      window.removeEventListener('scroll', debouncedHandleScroll);
-    };
+      const debouncedHandleScroll = debounce(handleScroll, 100);
+
+      window.addEventListener('scroll', debouncedHandleScroll);
+      return () => {
+        window.removeEventListener('scroll', debouncedHandleScroll);
+      };
+    }
   }, [setIsHidden]);
 
   return (
     <div className="min-h-screen flex flex-col">
+
       <Topbar
         isOpen={isRightbarOpen}
         isHidden={isHidden || isRightbarOpen}
         onClickRight={toggleRightbar}
       />
       <Rightbar isOpen={isRightbarOpen} toggle={toggleRightbar} />
-      <div style={{ marginTop: '9%' }} className="overflow-y-auto">
-        <div className="max-w-7xl mx-auto ">
-          <Outlet />
+      <div className="pt-20 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <Outlet />
+          </div>
         </div>
       </div>
+
     </div>
   );
 };

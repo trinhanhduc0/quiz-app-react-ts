@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import API_ENDPOINTS from '~/config';
 import { apiCallDelete, apiCallGet, apiCallPatch, apiCallPost } from '~/services/apiCallService';
 import { NavigateFunction } from 'react-router-dom';
-import { TestFormData } from '~/pages/ManageTest/ManageTestModal';
+import { TestFormData } from '~/pages/TestManage/ManageTestModal';
 
 const LINK = API_ENDPOINTS.TESTS;
 
@@ -27,12 +27,12 @@ interface DeleteTestParams {
   navigate: NavigateFunction;
 }
 
-interface ResetTestData{
+interface ResetTestData {
   class_id: string;
-  test_id:string;
+  test_id: string;
 }
 
-interface ResetTestParams{
+interface ResetTestParams {
   values: ResetTestData,
   navigate: NavigateFunction
 }
@@ -77,12 +77,13 @@ export const createTest = createAsyncThunk<TestFormData, CreateTestParams>(
   },
 );
 
-export const resetTest = createAsyncThunk<ResetTestData, ResetTestParams >(
+export const resetTest = createAsyncThunk<ResetTestData, ResetTestParams>(
   'tests/resetTest',
   async ({ values, navigate }) => {
-    return apiCallPost(API_ENDPOINTS.RESET_TEST, values, navigate);
+    return apiCallPost("API_ENDPOINTS.RESET_TEST", values, navigate);
   },
 );
+//IMPOTANT
 
 // --------- Slice ---------
 const initialState: TestState = {

@@ -125,12 +125,12 @@
     opacity: 0.9;
   }
 
-  &.answered {
+  &.submissioned {
     background-color: #4caf50;
     color: white;
   }
 
-  &.not-answered {
+  &.not-submissioned {
     background-color: #ff5722;
     color: white;
   }
@@ -147,13 +147,13 @@
   background-color: #f5f5f5; // Light background for buttons
 }
 
-.question-list-modal .question-btn.answered {
-  background-color: #4caf50; // Green for answered questions
+.question-list-modal .question-btn.submissioned {
+  background-color: #4caf50; // Green for submissioned questions
   color: #ffffff; // White icon on green background
 }
 
-.question-list-modal .question-btn.not-answered {
-  background-color: #ff9800; // Orange for unanswered questions
+.question-list-modal .question-btn.not-submissioned {
+  background-color: #ff9800; // Orange for unsubmissioned questions
   color: #ffffff; // White icon on orange background
 }
 
@@ -167,6 +167,5 @@
     width: 100%;
   }
 
-  .question-btn {
-  }
+  .question-btn {}
 }

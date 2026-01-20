@@ -1,4 +1,5 @@
 import React from 'react';
+import { useMediaQuery } from 'react-responsive';
 import { useNavigate } from 'react-router-dom';
 import ToggleButton from '~/components/toggleButton/ToggleButton';
 
@@ -10,32 +11,40 @@ interface TopbarProps {
 
 const Topbar: React.FC<TopbarProps> = ({ onClickRight, isOpen, isHidden }) => {
   const navigate = useNavigate();
+  const isMobile = useMediaQuery({ maxWidth: 767 });
 
   return (
     <div
       className={`
-        fixed top-0 left-0 w-full z-50 
-        flex justify-between items-center
-        bg-gradient-to-b from-blue-400 to-gray-300
-        shadow-md
-        transform transition-all duration-500 ease-in-out
-        ${isHidden ? '-translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100 pointer-events-auto'}
-        
-        `}
+    fixed top-0 left-0 w-full z-50 h-16
+    backdrop-blur-xl bg-white/70
+    border-b border-white/30
+    shadow-sm
+    transition-all duration-300
+    ${isHidden ? '-translate-y-full' : 'translate-y-0'}
+  `}
     >
-      <div className="flex  flex-[3]">
+      <div className="max-w-7xl mx-auto h-full px-6 flex items-center justify-between">
+
+        {/* Logo + Title */}
         <div
           onClick={() => navigate('/dashboard')}
-          role="button"
-          className="cursor-pointer transition-transform duration-200 hover:scale-105"
+          className="flex items-center gap-3 cursor-pointer"
         >
-          <img className="h-auto w-[150px] p-2" src="/logo.png" alt="Logo" />
+          <img src="/logo.png" className="h-9" />
+          {!isMobile && <div>
+            <p className="text-sm font-semibold text-gray-800">Quiz Management</p>
+            <p className="text-xs text-gray-500">Online Examination System</p>
+          </div>}
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-center gap-3">
+          <ToggleButton onClickButton={onClickRight} />
         </div>
       </div>
-      <div className="flex justify-end items-center flex-[1] relative">
-        <ToggleButton onClickButton={onClickRight} />
-      </div>
     </div>
+
   );
 };
 

@@ -2,7 +2,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { NavigateFunction } from 'react-router-dom';
 import API_ENDPOINTS from '~/config';
-import { ClassFormData } from '~/pages/ManageClass/ManageClass';
+import { ClassFormData } from '~/pages/ClassManage/ManageClass';
 import { apiCallDelete, apiCallGet, apiCallPatch, apiCallPost } from '~/services/apiCallService';
 
 // Type definitions
@@ -48,9 +48,7 @@ export const saveClass = createAsyncThunk<ClassFormData, { values: Partial<Class
 export const createClass = createAsyncThunk<ClassFormData, { values: Partial<ClassFormData> }>(
   'classes/createClass',
   async ({ values }) => {
-    console.log(values);
     const response = await apiCallPost(LINK, values);
-    console.log(response);
     return response as ClassFormData;
   },
 );
@@ -65,6 +63,9 @@ export const createCode = async (values: any): Promise<any> => {
     throw error;
   }
 };
+
+
+
 
 // Initial state
 const initialState: ClassState = {
@@ -85,15 +86,13 @@ const classSlice = createSlice({
       })
       .addCase(fetchClasses.fulfilled, (state, action: PayloadAction<ClassFormData[]>) => {
         state.status = 'succeeded';
-        state.allClass = action.payload;
-        console.log(state.allClass);
+        state.allClass = action.payload ?? [];
       })
       .addCase(fetchClasses.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.error.message || 'Failed to fetch classes';
       })
       .addCase(createClass.fulfilled, (state, action: PayloadAction<ClassFormData>) => {
-        console.log(action);
         state.allClass.push(action.payload);
       })
       .addCase(deleteClass.fulfilled, (state, action: PayloadAction<string>) => {
@@ -102,7 +101,7 @@ const classSlice = createSlice({
       .addCase(saveClass.fulfilled, (state, action: PayloadAction<ClassFormData>) => {
         const updated = action.payload;
         state.allClass = state.allClass.map((cls) => (cls._id === updated._id ? updated : cls));
-      });
+      })
   },
 });
 

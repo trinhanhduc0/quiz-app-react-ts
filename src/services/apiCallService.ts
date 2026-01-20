@@ -17,31 +17,33 @@ const apiCall = async <T = any>(
     };
 
     const response: AxiosResponse<T> = await axiosInstance(config);
-    return response.data;
-  } catch (error: any) {
-    if (error.response?.status === 401 && navigate) {
+    if (response?.status === 401 && navigate) {
       navigate('/login');
     }
-
+    return response.data;
+  } catch (error: any) {
+    if ((error.response?.status === 401 || error.status === 401) && navigate) {
+      navigate('/login');
+    }
     const message = error.response?.data?.message || error.message;
     console.error(`API error: ${message}`, error);
     throw new Error(message);
   }
 };
-export const apiCallGet = <T>(url: string, navigate?: NavigateFunction) =>
-  apiCall<T>(url, 'GET', undefined, navigate);
+export const apiCallGet = async <T>(url: string, navigate?: NavigateFunction) =>
+  await apiCall<T>(url, 'GET', undefined, navigate);
 
-export const apiCallPost = <T>(url: string, body: any, navigate?: NavigateFunction) =>
-  apiCall<T>(url, 'POST', body, navigate);
+export const apiCallPost = async <T>(url: string, body: any, navigate?: NavigateFunction) =>
+  await apiCall<T>(url, 'POST', body, navigate);
 
-export const apiCallPut = <T>(url: string, body: any, navigate?: NavigateFunction) =>
-  apiCall<T>(url, 'PUT', body, navigate);
+export const apiCallPut = async <T>(url: string, body: any, navigate?: NavigateFunction) =>
+  await apiCall<T>(url, 'PUT', body, navigate);
 
-export const apiCallDelete = <T>(url: string, body: any, navigate?: NavigateFunction) =>
-  apiCall<T>(url, 'DELETE', body, navigate);
+export const apiCallDelete = async <T>(url: string, body: any, navigate?: NavigateFunction) =>
+  await apiCall<T>(url, 'DELETE', body, navigate);
 
-export const apiCallPatch = <T>(url: string, body: any, navigate?: NavigateFunction) =>
-  apiCall<T>(url, 'PATCH', body, navigate);
+export const apiCallPatch = async <T>(url: string, body: any, navigate?: NavigateFunction) =>
+  await apiCall<T>(url, 'PATCH', body, navigate);
 
 export const apiUploadImage = async (
   endpoint: string,

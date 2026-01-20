@@ -1,66 +1,58 @@
 'use client';
 
-import type React from 'react';
+import React from 'react';
 import { useEffect, useState } from 'react';
-import type { FillInTheBlankAnswer } from '../QuestionComponent';
+import type { FillInTheBlankSubmission } from '../QuestionComponent';
 import { FillInTheBlank, Question } from '~/types/question';
-
-interface FillItem {
-  id: string;
-  text_before: string;
-  text_after: string;
-  blank?: string;
-  correct_answer?: string;
-}
+import Latex from 'react-latex-next';
 
 interface Props {
   question: Question;
-  onAnswerChange: (answerData: any) => void;
-  answer?: FillInTheBlankAnswer;
+  onSubmissionChange: (submissionData: any) => void;
+  submission?: FillInTheBlankSubmission;
   isDone: boolean;
-  showAnswer: boolean;
+  showSubmission: boolean;
 }
 
 const FillInTheBlankQuestion: React.FC<Props> = ({
   question,
-  onAnswerChange,
-  answer,
+  onSubmissionChange,
+  submission,
   isDone,
-  showAnswer,
+  showSubmission,
 }) => {
-  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [submissions, setSubmissions] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    const initialAnswers: Record<string, string> = {};
+    const initialSubmissions: Record<string, string> = {};
 
-    // Ensure answer is properly typed
-    if (answer) {
-      Object.entries(answer).forEach(([id, value]) => {
-        initialAnswers[id] = value || '';
+    // Ensure submission is properly typed
+    if (submission) {
+      Object.entries(submission).forEach(([id, value]) => {
+        initialSubmissions[id] = value || '';
       });
     }
 
-    setAnswers(initialAnswers);
-  }, [answer]);
+    setSubmissions(initialSubmissions);
+  }, [submission]);
 
   const handleInputChange = (id: string, event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
-    console.log(answers);
     // Avoid unnecessary re-renders if the value is not changing
-    if (answers[id] === value) return;
+    if (submissions[id] === value) return;
 
-    const updatedAnswers = { ...answers, [id]: value };
-    setAnswers(updatedAnswers);
+    const updatedSubmissions = { ...submissions, [id]: value };
+    setSubmissions(updatedSubmissions);
 
     // Create fill_in_the_blank array for API format
-    const fillInTheBlankArray = Object.entries(updatedAnswers).map(([key, val]) => ({
+    const fillInTheBlankArray = Object.entries(updatedSubmissions).map(([key, val]) => ({
       id: key,
-      correct_answer: val,
+      correct_submission: val,
     }));
 
     // Notify the parent component about the change with a flat structure
-    onAnswerChange({
-      answer: updatedAnswers, // This is the simple key-value map for the component
+    onSubmissionChange({
+      submission: updatedSubmissions, // This is the simple key-value map for the component
       fill_in_the_blank: fillInTheBlankArray, // This is the array format for the API
     });
   };
@@ -71,27 +63,27 @@ const FillInTheBlankQuestion: React.FC<Props> = ({
   };
 
   const getInputValue = (item: FillInTheBlank): string => {
-    if (showAnswer) {
-      return item.correct_answer || '';
+    if (showSubmission) {
+      return item.correct_submission || '';
     }
 
     if (isDone) {
-      return answers[`${item.id}`] || '';
+      return submissions[`${item.id}`] || '';
     }
 
-    return answers[`${item.id}`] || '';
+    return submissions[`${item.id}`] || '';
   };
+  { console.log(question) }
 
   return (
     <div className="max-w-full bg-white rounded-lg shadow-lg border border-gray-300 p-4">
       <h2 className="text-xl font-bold text-blue-600 mb-4">
-        Câu hỏi: {question.question_content?.text || 'Không có nội dung'}
+        Câu hỏi: {question.question_content?.content.text || 'Không có nội dung'}
       </h2>
-
       <div className="text-gray-800 lg:text-lg sm:text-sm flex flex-wrap items-center gap-2">
         {question.fill_in_the_blanks?.map((item) => (
           <span key={item.id} className="flex items-center flex-wrap">
-            <span className="text-gray-700">{item.text_before}</span>
+            {item.text_before?.is_math ? <Latex>{item.text_before?.text}</Latex> : <span className="text-gray-700">{item.text_before?.text}</span>}
             <input
               type="text"
               placeholder={item.blank}
@@ -106,7 +98,7 @@ const FillInTheBlankQuestion: React.FC<Props> = ({
                 width: `${calculateInputWidth(getInputValue(item)) + 20}px`,
               }}
             />
-            <span className="text-gray-700">{item.text_after}</span>
+            {item.text_after?.is_math ? <Latex>{item.text_after?.text}</Latex> : <span className="text-gray-700">{item.text_after?.text}</span>}
           </span>
         ))}
       </div>
@@ -114,4 +106,4 @@ const FillInTheBlankQuestion: React.FC<Props> = ({
   );
 };
 
-export default FillInTheBlankQuestion;
+export default React.memo(FillInTheBlankQuestion);

@@ -5,12 +5,13 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import API_ENDPOINTS from '~/config';
-import QuestionComponent, { type Answer } from '~/components/question/QuestionComponent';
-import type { QuestionAnswer, TestAnswer } from '~/types/quiz';
+import QuestionComponent, { type Submission } from '~/components/question/QuestionComponent';
+import type { QuestionSubmission, TestSubmission } from '~/types/quiz';
 import { FillInTheBlank, MatchItem, OrderItem, Question } from '~/types/question';
 import { apiCallPost } from '~/services/apiCallService';
 import { time, timeEnd } from 'console';
 import { TfiReload } from "react-icons/tfi";
+import { useTranslation } from 'react-i18next';
 
 interface CountdownTime {
   hours: number;
@@ -21,29 +22,29 @@ interface CountdownTime {
 interface InfoTest {
   isDone?: boolean;
   duration_minutes: number;
+  is_test: boolean;
+  end_time: string
 }
 
 interface Params extends Record<string, string | undefined> {
-  isTest?: string;
   author: string;
   testId?: string;
   classId?: string;
 }
 
-interface OptionAnswer {
-  id: string;
-  matchid?: string;
-}
+
 
 const DoTest: React.FC = () => {
   const navigate = useNavigate();
-  const { isTest, author, testId, classId } = useParams<Params>();
+  const { author, testId, classId } = useParams<Params>();
+  const { t } = useTranslation();
 
   const questionCache = `questions_${testId}`;
-  const answerCache = `quizAnswers_${testId}`;
+  const submissionCache = `quizSubmissions_${testId}`;
   const startTimeCache = `test_start_time_${testId}`;
   const endTimeCache = `test_end_time_${testId}`
   const [infoTest, setInfoTest] = useState<InfoTest | null>(null);
+  const isTest = infoTest?.is_test === true;
   const [countdownTime, setCountdownTime] = useState<CountdownTime>({
     hours: 0,
     minutes: 0,
@@ -53,32 +54,31 @@ const DoTest: React.FC = () => {
   const [score, setScore] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
-  const [answers, setAnswers] = useState<Record<string, Answer>>(() => {
-    const saved = localStorage.getItem(answerCache);
+  const [submissions, setSubmissions] = useState<Record<string, Submission>>(() => {
+    const saved = localStorage.getItem(submissionCache);
     return saved ? JSON.parse(saved) : {};
   });
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error'>('saved');
   const [isDone, setIsDone] = useState<boolean>(false);
-  const [showAnswer, setShowAnswer] = useState<boolean>(false);
+  const [showSubmission, setShowSubmission] = useState<boolean>(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
 
-  const resetTest = () => {
-    console.log("CLICK")
 
+  const resetTest = () => {
     localStorage.removeItem(questionCache);
-    localStorage.removeItem(answerCache);
+    localStorage.removeItem(submissionCache);
     localStorage.removeItem(endTimeCache);
     localStorage.removeItem(startTimeCache);
 
     window.location.reload()
   }
 
-  const handleAnswerChange = (questionId: string, answer: Answer) => {
+  const handleSubmissionChange = (questionId: string, submission: Submission) => {
     setSaveStatus('saving');
-    setAnswers((prev) => {
-      const updated = { ...prev, [questionId]: answer };
+    setSubmissions((prev) => {
+      const updated = { ...prev, [questionId]: submission };
       try {
-        localStorage.setItem(answerCache, JSON.stringify(updated));
+        localStorage.setItem(submissionCache, JSON.stringify(updated));
         setTimeout(() => setSaveStatus('saved'), 500);
       } catch (err) {
         setSaveStatus('error');
@@ -87,55 +87,55 @@ const DoTest: React.FC = () => {
     });
   };
 
-  function handleCurrentQuestionAnswerChange(answer: Answer) {
-    handleAnswerChange(currentQuestion._id, answer);
+  function handleCurrentQuestionSubmissionChange(submission: Submission) {
+    handleSubmissionChange(currentQuestion._id, submission);
   }
 
   const apiSendTest = async () => {
-    const filteredAnswers = Object.entries(answers).reduce(
+    const filteredSubmissions = Object.entries(submissions).reduce(
       (acc, [key, value]) => {
         acc[key] = {
           type: value.type,
-          answer: value.answer,
+          submission: value.submission,
         };
         return acc;
       },
-      {} as Record<string, { type: string; answer: any }>,
+      {} as Record<string, { type: string; submission: any }>,
     );
 
-    const testAnswer: TestAnswer = {
+    const testSubmission: TestSubmission = {
       author_mail: author as string,
       class_id: classId as string,
       test_id: testId as string,
-      question_answer: filteredAnswers,
+      question_submission: filteredSubmissions,
     };
 
+
     try {
-      const res = await apiCallPost(API_ENDPOINTS.SENDTEST, testAnswer, navigate);
+      const res = await apiCallPost(API_ENDPOINTS.SUBMIT_TEST, testSubmission, navigate);
       return res;
     } catch (error) {
-      console.log(error);
       throw error;
     }
   };
 
   const handleSendTest = async () => {
-    if (!window.confirm('Bạn chắc chắn muốn nộp bài?')) return;
+    if (!window.confirm(t('doTest.confirm_submit'))) return;
 
-    if (isTest !== 'false') {
+    if (infoTest?.is_test) {
       try {
         setSaveStatus('saving');
         await apiSendTest();
         setSaveStatus('saved');
-        alert('Nộp bài thành công!');
+        alert(t('doTest.submit_success'));
         localStorage.removeItem(questionCache);
-        localStorage.removeItem(answerCache);
+        localStorage.removeItem(submissionCache);
         localStorage.removeItem(endTimeCache);
         localStorage.removeItem(startTimeCache);
         window.location.reload();
       } catch {
         setSaveStatus('error');
-        alert('Đã có lỗi xảy ra khi nộp bài. Vui lòng thử lại.');
+        alert(t('doTest.submit_error'));
       }
     } else {
       localStorage.removeItem(`test_end_time_${testId}`);
@@ -144,36 +144,35 @@ const DoTest: React.FC = () => {
       const cached = localStorage.getItem(questionCache);
       if (cached) {
         const parsed = JSON.parse(cached);
-        setAnswers(simplifyAnswerData(parsed.answer));
+        setSubmissions(simplifySubmissionData(parsed.submission));
       }
     }
   };
 
-  const handleShowAnswer = () => {
-    setShowAnswer((prev) => !prev);
+  const handleShowSubmission = () => {
+    setShowSubmission((prev) => !prev);
   };
 
-  const simplifyAnswerData = (input: Record<string, any>): Record<string, Answer> => {
-    const map: Record<string, Answer> = {};
-    console.log(input);
+  const simplifySubmissionData = (input: Record<string, any>): Record<string, Submission> => {
+    const map: Record<string, Submission> = {};
     Object.entries(input).forEach(([questionId, qa]) => {
       if (qa.type === 'fill_in_the_blank') {
         map[questionId] = {
           id: questionId,
           type: qa.type,
-          answer: qa.answer || {},
-          fill_in_the_blanks: Object.entries(qa.answer || {}).map(([id, correct_answer]) => ({
+          submission: qa.submission || {},
+          fill_in_the_blanks: Object.entries(qa.submission || {}).map(([id, correct_submission]) => ({
             id,
-            correct_answer: String(correct_answer),
+            correct_submission: String(correct_submission),
           })),
           options: [],
         };
       } else if (qa.type === 'match_choice_question') {
-        const matchMap: Record<string, string[]> = qa.answer || {};
+        const matchMap: Record<string, string[]> = qa.submission || {};
         map[questionId] = {
           id: questionId,
           type: qa.type,
-          answer: matchMap,
+          submission: matchMap,
           match_items: [],
           match_options: [],
         };
@@ -181,16 +180,16 @@ const DoTest: React.FC = () => {
         map[questionId] = {
           id: questionId,
           type: qa.type,
-          answer: qa.answer || [],
-          options: (qa.answer || []).map((id: string) => ({ id })),
+          submission: qa.submission || [],
+          options: (qa.submission || []).map((id: string) => ({ id })),
           fill_in_the_blanks: [],
         };
       } else if (qa.type === 'multiple_choice_question') {
         map[questionId] = {
           id: questionId,
           type: qa.type,
-          answer: qa.answer || [],
-          options: (qa.answer || []).map((id: string) => ({ id })),
+          submission: qa.submission || [],
+          options: (qa.submission || []).map((id: string) => ({ id })),
           fill_in_the_blanks: [],
         };
       } else {
@@ -198,8 +197,8 @@ const DoTest: React.FC = () => {
         map[questionId] = {
           id: questionId,
           type: qa.type,
-          answer: qa.answer || '',
-          options: qa.answer ? [{ id: qa.answer }] : [],
+          submission: qa.submission || '',
+          options: qa.submission ? [{ id: qa.submission }] : [],
           fill_in_the_blanks: [],
         };
       }
@@ -208,103 +207,175 @@ const DoTest: React.FC = () => {
     return map;
   };
 
+  const getActualEndTime = (
+    startTimeISO: string,
+    durationMinutes: number,
+    testEndTimeISO: string,
+  ) => {
+    const start = new Date(startTimeISO).getTime();
+    const durationEnd = start + durationMinutes * 60 * 1000;
+    const testEnd = new Date(testEndTimeISO).getTime();
+
+    return new Date(Math.min(durationEnd, testEnd)).toISOString();
+  };
+
+
   useEffect(() => {
     let timerCleanup: (() => void) | undefined;
+
+    const initTestSession = (
+      testInfo: InfoTest,
+      questions: Question[],
+      submission?: any,
+    ) => {
+      setInfoTest(testInfo);
+      setQuestions(questions || []);
+
+      /* =========================
+       * TH1: ĐÃ HOÀN THÀNH
+       * ========================= */
+      if (submission?.end_time) {
+        setIsDone(true);
+        setScore(submission.score);
+        setSubmissions(submission.question_submission || {});
+        return;
+      }
+
+      /* =========================
+       * TH2: ĐANG LÀM – CÓ SUBMISSION
+       * ========================= */
+      if (submission?.start_time) {
+        setSubmissions(submission.question_submission || {});
+
+        const endTime = getActualEndTime(
+          submission.start_time,
+          testInfo.duration_minutes,
+          testInfo.end_time,
+        );
+
+        timerCleanup = startCountdown(endTime);
+
+        const savedSubmissions = localStorage.getItem(submissionCache);
+        if (savedSubmissions) {
+          setSubmissions(JSON.parse(savedSubmissions));
+        }
+        return;
+      }
+
+
+      /* =========================
+       * TH3: CHƯA LÀM
+       * ========================= */
+
+      const nowISO = new Date().toISOString();
+
+      const endTime = getActualEndTime(
+        nowISO,
+        testInfo.duration_minutes,
+        testInfo.end_time,
+      );
+
+      timerCleanup = startCountdown(endTime);
+
+    };
 
     const fetchQuestions = async () => {
       try {
         setLoading(true);
-        const cached = localStorage.getItem(questionCache);
 
+        /* =========================
+         * 1️⃣ ƯU TIÊN CACHE
+         * ========================= */
+        const cached = localStorage.getItem(questionCache);
         if (cached) {
           const parsed = JSON.parse(cached);
-          setInfoTest(parsed.test_info);
-          setQuestions(parsed.questions || []);
-          if ('answer' in parsed) {
-            setIsDone(true);
-            setScore(parsed.answer.score);
-            setAnswers(parsed.answer.question_answer);
-          } else {
-            const savedAnswers = localStorage.getItem(answerCache);
-            if (savedAnswers) setAnswers(JSON.parse(savedAnswers));
-            console.log(isTest);
-            if (isTest == 'true') {
-              timerCleanup = startCountdown(parsed.test_info);
-            }
-          }
+          initTestSession(
+            parsed.test_info,
+            parsed.questions,
+            parsed.submission,
+          );
           return;
         }
 
+        /* =========================
+         * 2️⃣ GỌI API
+         * ========================= */
         const response = await apiCallPost<any>(
-          API_ENDPOINTS.GETQUESTIONS,
-          { class_id: classId, author_mail: author, test_id: testId, is_test: isTest === 'true' },
+          API_ENDPOINTS.START_TEST,
+          {
+            class_id: classId,
+            author_mail: author,
+            test_id: testId,
+          },
           navigate,
         );
 
+        // 🔐 LƯU CACHE
         localStorage.setItem(
           questionCache,
           JSON.stringify({
             test_info: response.test_info,
             questions: response.questions,
-            answer: response.answer,
+            submission: response.submission,
           }),
         );
-        setInfoTest(response.test_info);
-        setQuestions(response.questions || []);
 
-        if (!localStorage.getItem(startTimeCache)) {
-          localStorage.setItem(startTimeCache, new Date().toISOString());
-        }
-
-        if ('answer' in response) {
-          setIsDone(true);
-          setScore(response.answer.score);
-          setAnswers(simplifyAnswerData(response.answer));
-        } else {
-          const savedAnswers = localStorage.getItem(answerCache);
-          if (savedAnswers) setAnswers(JSON.parse(savedAnswers));
-          timerCleanup = startCountdown(response.test_info);
-        }
+        initTestSession(
+          response.test_info,
+          response.questions,
+          response.submission,
+        );
       } catch (err) {
-        console.log(err);
-        setError('Lỗi khi tải đề thi');
+        console.error(err);
+        setError(t('doTest.load_error'));
       } finally {
         setLoading(false);
       }
     };
 
-    const startCountdown = (testInfo: InfoTest) => {
-      const now = Date.now();
-      const cachedEnd = localStorage.getItem(`test_end_time_${testId}`);
-      const endTime = cachedEnd ? parseInt(cachedEnd) : now + testInfo.duration_minutes * 60000;
-
-      if (!cachedEnd) localStorage.setItem(`test_end_time_${testId}`, endTime.toString());
-
-      const interval = setInterval(() => {
-        const diff = endTime - Date.now();
-        if (diff <= 0) {
-          clearInterval(interval);
-          apiSendTest().then(() => alert('Hết giờ làm bài. Bài đã được tự động nộp.'));
-        } else {
-          setCountdownTime({
-            hours: Math.floor(diff / 3600000),
-            minutes: Math.floor((diff % 3600000) / 60000),
-            seconds: Math.floor((diff % 60000) / 1000),
-          });
-        }
-      }, 1000);
-
-      return () => clearInterval(interval);
-    };
-
     fetchQuestions();
+
     return () => timerCleanup?.();
-    }, [testId, author, isTest, classId, answers]);
-    
+  }, [testId, author, classId]);
+
+
+  const startCountdown = (endTimeISO: string) => {
+    const endTime = new Date(endTimeISO).getTime();
+
+    const interval = setInterval(() => {
+      const diff = endTime - Date.now();
+
+      if (diff <= 0) {
+        clearInterval(interval);
+
+        apiSendTest().then(() => {
+          alert(t('doTest.time_up'));
+        });
+
+        setCountdownTime({
+          hours: 0,
+          minutes: 0,
+          seconds: 0,
+        });
+
+        return;
+      }
+
+      setCountdownTime({
+        hours: Math.floor(diff / 3600000),
+        minutes: Math.floor((diff % 3600000) / 60000),
+        seconds: Math.floor((diff % 60000) / 1000),
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  };
+
+
   const totalScore = questions.reduce((sum, q) => sum + (q.score || 0), 0);
   const currentQuestion = questions[currentQuestionIndex];
-  const answeredCount = Object.keys(answers).length;
-  const progressPercentage = questions.length ? (answeredCount / questions.length) * 100 : 0;
+  const submissionedCount = submissions ? Object.keys(submissions).length : 0;
+  const progressPercentage = questions.length ? (submissionedCount / questions.length) * 100 : 0;
 
   return loading ? (
     <div className="flex justify-center items-center h-screen">
@@ -314,29 +385,28 @@ const DoTest: React.FC = () => {
     <div className="text-red-600 text-center p-6 text-lg">{error}</div>
   ) : (
     <div className="max-w-4xl mx-auto p-6 space-y-4">
-
       {/* Countdown and Progress */}
       {!isDone && (
         <div className="space-y-2">
           <div className="flex justify-between items-center">
-            {isTest == 'true' && (
+            {infoTest && infoTest.is_test && (
               <div className="text-lg font-semibold text-red-600">
-                Thời gian còn lại: {countdownTime.hours}h {countdownTime.minutes}m{' '}
+                {t('doTest.time_remaining')}: {countdownTime.hours}h {countdownTime.minutes}m{' '}
                 {countdownTime.seconds}s
               </div>
             )}
             <div className="flex items-center gap-2">
               {saveStatus === 'saving' && (
-                <span className="text-yellow-500 text-sm">Đang lưu...</span>
+                <span className="text-yellow-500 text-sm">{t('doTest.saving')}</span>
               )}
-              {saveStatus === 'saved' && <span className="text-green-500 text-sm">Đã lưu</span>}
-              {saveStatus === 'error' && <span className="text-red-500 text-sm">Lỗi lưu</span>}
-              {isTest == 'true' && (
+              {saveStatus === 'saved' && <span className="text-green-500 text-sm">{t('doTest.saved')}</span>}
+              {saveStatus === 'error' && <span className="text-red-500 text-sm">{t('doTest.save_error')}</span>}
+              {isTest && (
                 <button
                   onClick={handleSendTest}
                   className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
                 >
-                  Nộp bài
+                  {t('doTest.submit_test')}
                 </button>
               )}
             </div>
@@ -350,62 +420,61 @@ const DoTest: React.FC = () => {
             ></div>
           </div>
           <div className="text-sm text-gray-600 text-right">
-            Đã trả lời: {answeredCount}/{questions.length} câu hỏi
+            {t('doTest.submissioned')}: {submissionedCount}/{questions.length} {t('doTest.questions_count')}
           </div>
         </div>
       )}
 
       {isDone ? (
         <div className="text-green-700 font-semibold text-xl text-center">
-          Điểm: {score}/{totalScore}
+          {t('doTest.score')}: {score}/{totalScore}
         </div>
       ) : null}
-
-      {currentQuestion ? (
-        <div>
-          <QuestionComponent
-            question={currentQuestion}
-            isDone={isDone}
-            showAnswer={showAnswer}
-            answer={answers[currentQuestion._id] || null}
-            onAnswerChange={handleCurrentQuestionAnswerChange}
-            author={author || ''}
-          />
-        </div>
-      ) : null}
-
       <div className="flex justify-between mt-6">
         <button
           onClick={() => setCurrentQuestionIndex((i) => Math.max(i - 1, 0))}
           disabled={currentQuestionIndex === 0}
           className="flex items-center px-4 py-2 bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50"
         >
-          <ChevronLeft className="mr-2" /> Câu trước
+          <ChevronLeft className="mr-2" /> {t('doTest.previous_question')}
         </button>
 
-        <div className="text-sm text-gray-600">
-          Câu {currentQuestionIndex + 1}/{questions.length}
+        <div className="text-sm text-gray-600 flex items-center">
+          {t('question')} {currentQuestionIndex + 1}/{questions.length}
         </div>
-
+        <button className='p-5' onClick={resetTest}> <TfiReload />
+        </button>
         <button
           onClick={() => setCurrentQuestionIndex((i) => Math.min(i + 1, questions.length - 1))}
           disabled={currentQuestionIndex === questions.length - 1}
           className="flex items-center px-4 py-2 bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50"
         >
-          Câu tiếp <ChevronRight className="ml-2" />
+          {t('doTest.next_question')} <ChevronRight className="ml-2" />
         </button>
       </div>
-      {(isTest !== 'true' || (isDone && isTest !== 'true')) && (
+      {currentQuestion ? (
+        <div>
+          <QuestionComponent
+            question={currentQuestion}
+            isDone={isDone}
+            showSubmission={showSubmission}
+            submission={submissions[currentQuestion._id] || null}
+            onSubmissionChange={handleCurrentQuestionSubmissionChange}
+            author={author || ''}
+          />
+        </div>
+      ) : null}
+
+
+      {(!isTest || (isDone && !isTest)) && (
         <div className="flex justify-center items-center">
           <button
-            onClick={handleShowAnswer}
+            onClick={handleShowSubmission}
             className={`px-4 py-2 rounded-full font-semibold transition-colors duration-200 
-        ${showAnswer ? 'bg-blue-500 text-white hover:bg-white-600' : 'bg-gray-300 text-gray-800 hover:bg-gray-400'}
+        ${showSubmission ? 'bg-blue-500 text-white hover:bg-white-600' : 'bg-gray-300 text-gray-800 hover:bg-gray-400'}
       `}
           >
-            {showAnswer ? 'Ẩn đáp án' : 'Hiện đáp án'}
-          </button>
-          <button className='p-5' onClick={resetTest}><TfiReload />
+            {showSubmission ? t('doTest.hide_submission') : t('doTest.show_submission')}
           </button>
         </div>
       )}
@@ -413,8 +482,8 @@ const DoTest: React.FC = () => {
       {/* Danh sách câu */}
       <div className="flex flex-wrap gap-2 mt-4">
         {questions.map((q, i) => {
-          // Check if this question has an answer
-          const hasAnswer = !!answers[q._id];
+          // Check if this question has an submission
+          const hasSubmission = !!submissions[q._id];
 
           return (
             <button
@@ -423,7 +492,7 @@ const DoTest: React.FC = () => {
               className={`w-10 h-10 rounded-full flex items-center justify-center border 
                 ${currentQuestionIndex === i
                   ? 'bg-blue-600 text-white'
-                  : hasAnswer
+                  : hasSubmission
                     ? 'bg-green-100 border-green-500'
                     : 'bg-white hover:bg-gray-100'
                 }`}
@@ -433,6 +502,7 @@ const DoTest: React.FC = () => {
           );
         })}
       </div>
+
     </div>
   );
 };

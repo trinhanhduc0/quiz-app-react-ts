@@ -1,3 +1,5 @@
+import { Level } from '~/components/level/LevelComponent';
+import { Topic } from '~/components/topic/TopicComponent';
 import {
   FillInTheBlank,
   MatchItem,
@@ -13,10 +15,10 @@ export interface QuestionFormData {
   type: 'multiple_choice' | 'multi_select' | 'fill_in_the_blank' | 'match' | 'ordering' | string; // định nghĩa lại các loại câu hỏi
   score: number;
   question_content: QuestionContent;
-  options: Option[]; // dùng cho multiple_choice, multi_select
-  fill_in_the_blanks: FillInTheBlank[]; // chỉ dùng cho fill_in_the_blank
-  order_items: OrderItem[]; // chỉ dùng cho ordering question
-  match_items: MatchItem[]; // chỉ dùng cho match choice
+  options?: Option[]; // dùng cho multiple_choice, multi_select
+  fill_in_the_blanks?: FillInTheBlank[]; // chỉ dùng cho fill_in_the_blank
+  order_items?: OrderItem[]; // chỉ dùng cho ordering question
+  match_items?: MatchItem[]; // chỉ dùng cho match choice
   match_options: MatchOption[]; // chỉ dùng cho match choice
   metadata: Metadata; // bổ sung metadata (author, v.v.)
   tags: string[];
@@ -24,17 +26,20 @@ export interface QuestionFormData {
   created_at?: string;
   updated_at?: string;
   correct_map?: Record<string, string> | any[];
+  level?: Level | null,
+  topic?: Topic | null
 }
 
 export const INITIAL_FORM_DATA: QuestionFormData = {
   _id: '',
-  type: 'multiple_choice',
+  type: '',
   score: 1,
   question_content: {
-    text: '',
-    image_url: '',
-    audio_url: '',
-    video_url: '',
+    content: {
+      is_math: false,
+      text: ""
+    },
+    file_url: '',
   },
   options: [],
   fill_in_the_blanks: [],
@@ -47,4 +52,6 @@ export const INITIAL_FORM_DATA: QuestionFormData = {
   tags: [],
   created_at: '',
   updated_at: '',
+  level: null,
+  topic: null,
 };

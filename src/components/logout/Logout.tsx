@@ -1,12 +1,12 @@
 // src/components/Logout.tsx
 import { FC, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import TokenService from '~/services/TokenService';
+import TokenService from '~/services/StorageService';
 
 const Logout: FC = () => {
   const navigate = useNavigate();
 
-  useEffect(() => {}, [navigate]);
+  useEffect(() => { }, [navigate]);
 
   return null; // No UI needed for this component
 };

@@ -1,6 +1,6 @@
 // utils/axiosInstance.ts
 import axios from 'axios';
-import TokenService from './TokenService';
+import TokenService from './StorageService';
 
 const axiosInstance = axios.create({
   headers: {

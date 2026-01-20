@@ -1,53 +1,52 @@
 'use client';
 
-import type React from 'react';
+import React from 'react';
 import { useEffect, useState } from 'react';
-import OptionImage from '~/components/image/OptionImage';
-import type { MultipleChoiceAnswer } from '../QuestionComponent';
 import { Option, Question } from '~/types/question';
+import Latex from 'react-latex-next';
+import FileViewer from '~/components/file_upload/FileViewer';
+import { SingleChoiceSubmission } from '../QuestionComponent';
 
 interface Props {
   question: Question;
   author: string;
-  onAnswerChange: (answerData: any) => void;
-  answer?: MultipleChoiceAnswer;
+  onSubmissionChange: (submissionData: any) => void;
+  submission?: SingleChoiceSubmission;
   isDone: boolean;
-  showAnswer: boolean;
+  showSubmission: boolean;
 }
 
 const SingleChoiceQuestion: React.FC<Props> = ({
   question,
   author,
-  onAnswerChange,
-  answer,
+  onSubmissionChange,
+  submission,
   isDone,
-  showAnswer,
+  showSubmission,
 }) => {
   const [selectedChoice, setSelectedChoice] = useState<string | null>(null);
-
   useEffect(() => {
-    if (answer) {
-      setSelectedChoice(answer);
+    if (submission) {
+      setSelectedChoice(submission);
     } else {
       setSelectedChoice(null);
     }
-  }, [answer]);
+  }, [submission]);
 
   const handleOptionChange = (optionId: string) => {
     if (isDone) return;
-
     setSelectedChoice(optionId);
 
     const options = [{ id: optionId }];
 
-    onAnswerChange({
-      answer: optionId,
+    onSubmissionChange({
+      submission: optionId,
       options: options,
     });
   };
 
   const getOptionClass = (option: Option) => {
-    if (showAnswer) {
+    if (showSubmission) {
       return option.iscorrect
         ? 'border-blue-500 bg-blue-50'
         : 'border-gray-300 hover:border-blue-500';
@@ -60,18 +59,15 @@ const SingleChoiceQuestion: React.FC<Props> = ({
 
   return (
     <div className="w-full max-w-2xl mx-auto p-6 bg-white rounded-2xl shadow-xl">
-      <h2 className="text-2xl font-semibold text-gray-800 mb-6">
-        Câu hỏi: {question.question_content.text}
-      </h2>
 
-      {question.question_content.image_url && (
+      <h2>Câu hỏi:</h2>
+      {
+        question.question_content.content.is_math ? <Latex>{question.question_content.content.text}</Latex> : <h2 className="text-2xl font-semibold text-gray-800 mb-6"> {question.question_content.content.text}        </h2>
+      }
+
+      {question.question_content.file_url && (
         <div className="flex justify-center mb-6">
-          <OptionImage
-            imageUrl={question.question_content.image_url}
-            email={author}
-            width={200}
-            className="rounded-lg shadow-lg"
-          />
+          <FileViewer filename={question.question_content.file_url} />
         </div>
       )}
 
@@ -86,29 +82,21 @@ const SingleChoiceQuestion: React.FC<Props> = ({
             <input
               type="radio"
               value={option.id}
-              checked={showAnswer ? !!option.iscorrect : selectedChoice === option.id}
+              checked={showSubmission ? !!option.iscorrect : selectedChoice === option.id}
               onChange={() => handleOptionChange(option.id as string)}
               disabled={isDone}
               className="h-5 w-5 text-blue-600 border-gray-300 rounded-full focus:ring-blue-500 mr-4"
             />
             <div className="flex flex-col sm:flex-row items-center w-full gap-4">
-              <span className="flex-1 text-gray-800 text-lg font-medium text-center sm:text-left">
-                {option.text}
-              </span>
-              {option.image_url && (
-                <OptionImage
-                  imageUrl={option.image_url}
-                  email={author}
-                  width={80}
-                  className="rounded-lg shadow-sm h-24 w-24 object-cover sm:ml-4"
-                />
-              )}
+              {option.text.is_math ? <Latex>{option.text.text}</Latex> : <span className="flex-1 text-gray-800 text-lg font-medium text-center sm:text-left">
+                {option.text.text}
+              </span>}
             </div>
           </label>
         ))}
       </div>
-    </div>
+    </div >
   );
 };
 
-export default SingleChoiceQuestion;
+export default React.memo(SingleChoiceQuestion);

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import {
   DndContext,
   closestCenter,
@@ -15,28 +15,36 @@ import {
 } from '@dnd-kit/core';
 import { SortableContext, useSortable, rectSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { MatchAnswer } from '../QuestionComponent';
-import { MatchItem, MatchOption } from '~/types/question';
+import { MatchSubmission } from '../QuestionComponent';
+import { MatchItem, MatchOption, Question } from '~/types/question';
+import Latex from 'react-latex-next';
 
 interface MatchQuestionProps {
-  match_items: MatchItem[];
-  match_options: MatchOption[];
-  onAnswerChange: (updatedAnswer: any) => void;
-  answer: MatchAnswer;
+  question: Question
+  // match_items: MatchItem[];
+  // match_options: MatchOption[];
+  onSubmissionChange: (updatedSubmission: any) => void;
+  submission: MatchSubmission; // { [itemId]: string[] }
   isDone: boolean;
-  showAnswer: boolean;
+  showSubmission: boolean;
 }
 
 const SortableMatch: React.FC<{
   id: string;
-  content: string;
+  content: any;
   isCorrect?: boolean;
-  showAnswer: boolean;
+  showSubmission: boolean;
   isDone: boolean;
-}> = ({ id, content, isCorrect, showAnswer, isDone }) => {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+}> = ({ id, content, isCorrect, showSubmission, isDone }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
     id,
-    animateLayoutChanges: () => true,
     disabled: isDone,
   });
 
@@ -47,7 +55,11 @@ const SortableMatch: React.FC<{
     zIndex: isDragging ? 50 : 'auto',
   };
 
-  const bgColor = showAnswer ? (isCorrect ? 'bg-green-200' : 'bg-red-200') : 'bg-purple-200';
+  const bgColor = showSubmission
+    ? isCorrect
+      ? 'bg-green-200'
+      : 'bg-red-200'
+    : 'bg-purple-200';
 
   return (
     <div
@@ -55,12 +67,13 @@ const SortableMatch: React.FC<{
       {...attributes}
       {...listeners}
       style={style}
-      className={`p-2 ${bgColor} m-1 rounded-md shadow text-center font-medium cursor-pointer`}
+      className={`p-2 ${bgColor} m-1 rounded-md shadow text-center font-medium cursor-pointer select-none`}
     >
       {content}
     </div>
   );
 };
+
 const DroppableBox: React.FC<{
   id: string;
   children: React.ReactNode;
@@ -70,49 +83,84 @@ const DroppableBox: React.FC<{
   return (
     <div
       ref={setNodeRef}
-      className={`flex flex-wrap min-h-[60px] border p-2 rounded-md ${
-        isOver ? 'bg-green-50' : 'bg-gray-100'
-      } space-y-2 transition-all`}
+      className={`flex flex-wrap min-h-[60px] border p-2 rounded-md ${isOver ? 'bg-green-50' : 'bg-gray-100'
+        } transition-all`}
     >
       {children}
-      {/* Add an empty div to increase drop area */}
-      <div className="min-h-[32px]" />
+      <div className="min-h-[32px] w-full" />
     </div>
   );
 };
 
 const MatchQuestion: React.FC<MatchQuestionProps> = ({
-  match_items,
-  match_options,
-  onAnswerChange,
-  answer,
+  question,
+  // match_items,
+  // match_options,
+  onSubmissionChange,
+  submission,
   isDone,
-  showAnswer,
+  showSubmission,
+
+
+
+
 }) => {
+  const [activeId, setActiveId] = React.useState<string | null>(null);
   const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 1,
-      },
-    }),
+    useSensor(PointerSensor)
   );
+  const currentMatches = useMemo<Record<string, string[]>>(() => {
+    const matches: Record<string, string[]> = {};
 
-  const [matches, setMatches] = useState<Record<string, string[]>>({});
-  const [unmatchedOptions, setUnmatchedOptions] = useState<MatchOption[]>([]);
-  const [activeId, setActiveId] = useState<string | null>(null);
+    if (!submission) return matches;
 
-  useEffect(() => {
-    const initMatches: Record<string, string[]> = {};
-    match_items.forEach((item) => {
-      initMatches[item.id as string] = answer?.[item.id as string] || [];
+    if (question && question.match_items) {
+
+    }
+
+    question && question.match_items && question?.match_items.forEach((item) => {
+      matches[item.id as string] = submission[item.id as string] ?? [];
+    });
+    return matches;
+  }, [submission, question.match_items]);
+
+  // All matched option IDs
+  const matchedOptionIds = useMemo(() => {
+    return Object.values(currentMatches).flat();
+  }, [currentMatches]);
+
+  // Unmatched options (kho đáp án)
+  const unmatchedOptions = useMemo(() => {
+    return question?.match_options?.filter(
+      (opt) => !matchedOptionIds.includes(opt.id as string)
+    );
+  }, [question.match_options, matchedOptionIds]);
+
+  // Khi showSubmission → hiển thị theo đáp án đúng
+  const displayMatches = useMemo<Record<string, string[]>>(() => {
+    if (!showSubmission) return currentMatches;
+
+    const correct: Record<string, string[]> = {};
+
+    question.match_items?.forEach((item) => {
+      const itemId = item.id as string;
+      correct[itemId] =
+        question.match_options
+          ?.filter(opt => opt.match_id === itemId)
+          .map(opt => opt.id as string) ?? [];
     });
 
-    const matchedOptionIds = Object.values(initMatches).flat();
-    const unmatched = match_options.filter((opt) => !matchedOptionIds.includes(opt.id as string));
+    return correct;
+  }, [showSubmission, currentMatches, question.match_items, question.match_options]);
 
-    setMatches(initMatches);
-    setUnmatchedOptions(unmatched);
-  }, [match_items, match_options, answer]);
+  const displayUnmatched = useMemo<MatchOption[]>(() => {
+    if (showSubmission) {
+      // khi show đáp án → chỉ hiển thị option KHÔNG có match_id
+      return question.match_options?.filter(opt => !opt.match_id) ?? [];
+    }
+
+    return unmatchedOptions ?? [];
+  }, [showSubmission, unmatchedOptions, question.match_options]);
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id.toString());
@@ -127,102 +175,82 @@ const MatchQuestion: React.FC<MatchQuestionProps> = ({
     const activeId = active.id.toString();
     const overId = over.id.toString();
 
-    const isDroppingToBank = overId === 'match-bank';
-    const isDroppingToItem = match_items.some((item) => (item.id as string) === overId);
+    const isBank = overId === 'match-bank';
+    const isItem = question?.match_items?.some((item) => item.id === overId);
 
-    if (!isDroppingToBank && !isDroppingToItem) return;
+    if (!isBank && !isItem) return;
 
-    const updatedMatches: Record<string, string[]> = JSON.parse(JSON.stringify(matches));
+    // Nếu đang show đáp án hoặc đã nộp → không cho thay đổi
+    if (isDone || showSubmission) return;
 
-    // Remove activeId from all current matches
-    for (const key in updatedMatches) {
-      updatedMatches[key] = updatedMatches[key].filter((id) => id !== activeId);
-    }
+    // Tạo bản sao mới của submission hiện tại
+    const newMatches: Record<string, string[]> = {};
 
-    if (isDroppingToItem) {
-      if (!updatedMatches[overId]) updatedMatches[overId] = [];
-      updatedMatches[overId].push(activeId);
-    }
-
-    const matchedOptionIds = Object.values(updatedMatches).flat();
-    const updatedUnmatched = match_options.filter(
-      (opt) => !matchedOptionIds.includes(opt.id as string),
-    );
-
-    const updatedMatchOptions = match_options.map((opt) => {
-      const entry = Object.entries(updatedMatches).find(([_, ids]) =>
-        ids.includes(opt.id as string),
-      );
-      return {
-        ...opt,
-        match_id: entry?.[0] ?? undefined,
-      };
+    // Copy tất cả các cặp hiện tại
+    question?.match_items?.forEach((item) => {
+      const itemId = item.id as string;
+      const current = currentMatches[itemId] ?? [];
+      newMatches[itemId] = current.filter((id) => id !== activeId);
     });
 
-    setMatches(updatedMatches);
-    setUnmatchedOptions(updatedUnmatched);
+    // Nếu thả vào một item → thêm vào đó
+    if (isItem) {
+      newMatches[overId] = [...(newMatches[overId] ?? []), activeId];
+    }
 
-    onAnswerChange({
+    // Gửi lên parent (chỉ gửi phần submission mapping)
+    onSubmissionChange({
       type: 'match_choice_question',
-      answer: updatedMatches,
-      match_items,
-      match_options: updatedMatchOptions,
+      submission: newMatches,
     });
-  };
-
-  const getCorrectMatchId = (optionId: string) => {
-    return match_options.find((opt) => opt.id === optionId)?.match_id;
-  };
-
-  const isCorrectMatch = (itemId: string, optionId: string) => {
-    return getCorrectMatchId(optionId) === itemId;
   };
 
   const getOptionText = (id: string) => {
-    return match_options.find((opt) => opt.id === id)?.text || '';
+    const match_option = question?.match_options?.find((opt) => opt.id === id);
+    return match_option?.text.is_math ? <Latex>{match_option?.text.text}</Latex> : match_option?.text.text;
   };
 
-  // Khi showAnswer === true → render theo đáp án đúng
-  const displayMatches = showAnswer
-    ? match_items.reduce(
-        (acc, item) => {
-          acc[item.id as string] = match_options
-            .filter((opt) => (opt.match_id as string) === item.id)
-            .map((opt) => opt.id as string);
-          return acc;
-        },
-        {} as Record<string, string[]>,
-      )
-    : matches;
+  const isCorrectMatch = (itemId: string, optionId: string) => {
+    const correctItemId = question?.match_options?.find((opt) => opt.id === optionId)?.match_id;
+    return correctItemId === itemId;
+  };
 
-  const displayUnmatched = showAnswer
-    ? match_options.filter((opt) => !opt.match_id)
-    : unmatchedOptions;
+  const activeOptionText = activeId ? getOptionText(activeId) : null;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
+      <h2 className="text-xl font-bold text-blue-600 mb-4">
+        Câu hỏi: {question.question_content?.content.text || 'Không có nội dung'}
+      </h2>
       <DndContext
         sensors={sensors}
         collisionDetection={pointerWithin}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <div className="grid md:grid-cols-2 gap-4">
-          {match_items.map((item) => (
-            <div key={item.id} className="p-4 border rounded-md bg-white shadow space-y-2">
-              <div className="font-medium text-gray-700">{item.text}</div>
+        <div className="grid md:grid-cols-2 gap-6">
+          {question?.match_items?.map((item) => (
+            <div
+              key={item.id}
+              className="p-5 border rounded-lg bg-white shadow-md space-y-3"
+            >
+              <div className="font-semibold text-gray-800 text-lg">
+
+                {item.text.is_math ? <Latex>{item.text.text}</Latex> : item.text.text}
+              </div>
+
               <SortableContext
-                items={displayMatches[item.id as string] || []}
+                items={displayMatches[item.id as string] ?? []}
                 strategy={rectSortingStrategy}
               >
                 <DroppableBox id={item.id as string}>
-                  {(displayMatches[item.id as string] || []).map((optId) => (
+                  {(displayMatches[item.id as string] ?? []).map((optId) => (
                     <SortableMatch
                       key={optId}
                       id={optId}
                       content={getOptionText(optId)}
                       isCorrect={isCorrectMatch(item.id as string, optId)}
-                      showAnswer={showAnswer}
+                      showSubmission={showSubmission}
                       isDone={isDone}
                     />
                   ))}
@@ -232,19 +260,20 @@ const MatchQuestion: React.FC<MatchQuestionProps> = ({
           ))}
         </div>
 
-        <div className="mt-6">
-          <h3 className="font-semibold mb-2">Kho đáp án</h3>
+        <div className="mt-8">
+          <h3 className="font-bold text-lg mb-3 text-gray-700">Kho đáp án</h3>
+
           <SortableContext
-            items={displayUnmatched.map((opt) => opt.id as string)}
+            items={displayUnmatched?.map((opt) => opt.id as string)}
             strategy={rectSortingStrategy}
           >
             <DroppableBox id="match-bank">
-              {displayUnmatched.map((opt) => (
+              {displayUnmatched?.map((opt) => (
                 <SortableMatch
                   key={opt.id}
                   id={opt.id as string}
-                  content={opt.text as string}
-                  showAnswer={false}
+                  content={opt.text.text as string}
+                  showSubmission={false}
                   isDone={isDone}
                 />
               ))}
@@ -253,15 +282,15 @@ const MatchQuestion: React.FC<MatchQuestionProps> = ({
         </div>
 
         <DragOverlay>
-          {activeId ? (
-            <div className="p-2 bg-purple-300 rounded-md shadow text-center font-medium">
-              {getOptionText(activeId)}
+          {activeId && activeOptionText ? (
+            <div className="p-3 bg-purple-300 rounded-lg shadow-lg text-center font-medium">
+              {activeOptionText}
             </div>
           ) : null}
         </DragOverlay>
       </DndContext>
     </div>
   );
-};
+}
 
-export default MatchQuestion;
+export default React.memo(MatchQuestion);

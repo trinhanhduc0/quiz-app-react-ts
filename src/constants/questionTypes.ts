@@ -2,8 +2,8 @@ import { OrderItem, MatchItem, MatchOption, FillInTheBlank, Option } from '~/typ
 
 // Question types constants
 export const QUESTION_TYPES = {
-  SINGLE: 'single_choice_question',
-  MULTIPLE: 'multiple_choice_question',
+  SINGLE: 'single',
+  MULTIPLE: 'multiple',
   MATCH: 'match_choice_question',
   ORDER: 'order_question',
   FILL: 'fill_in_the_blank',
@@ -20,12 +20,12 @@ export const TYPE_STYLES = {
 
 export const TYPE_SPECIFIC_FIELDS = {
   [QUESTION_TYPES.SINGLE]: {
-    options: [{ text: '', image_url: '', is_correct: false }] as Option[],
+    options: [{ text: { is_math: false, text: "" }, imageurl: '', iscorrect: false }] as Option[],
     metadata: {},
     suggestion: '',
   },
   [QUESTION_TYPES.MULTIPLE]: {
-    options: [{ text: '', image_url: '', is_correct: false }] as Option[],
+    options: [{ text: { is_math: false, text: "" }, imageurl: '', iscorrect: false }] as Option[],
     metadata: {},
     suggestion: '',
   },
@@ -44,10 +44,16 @@ export const TYPE_SPECIFIC_FIELDS = {
     fill_in_the_blanks: [
       {
         id: '', // added missing id property
-        text_before: '',
+        text_before: {
+          is_math: false,
+          text: ""
+        },
         blank: '_____',
-        text_after: '',
-        correct_answer: '',
+        text_after: {
+          is_math: false,
+          text: ""
+        },
+        correct_submission: '',
       },
     ] as FillInTheBlank[], // Ensure it's typed as FillInTheBlank[]
     metadata: {},

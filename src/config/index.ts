@@ -1,32 +1,46 @@
-// const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-const API_BASE_URL = 'http://localhost:8080';
-const API_BASE_URL_LOGIN = 'http://localhost:8081';
-const API_BASE_URL_DO_TEST = 'http://localhost:8082';
+// ================= BASE URL =================
+const API_BASE_URL = 'http://localhost:8080';       // main backend
+const API_BASE_URL_DO_TEST = 'http://localhost:3030'; // test service
 
+// ================= API ENDPOINTS =================
 const API_ENDPOINTS = {
-  GOOGLE_LOGIN: `${API_BASE_URL_LOGIN}/auth/google/login`,
-  USER_API: `${API_BASE_URL}/users`,
+  // ========= AUTH / USER =========
+  GOOGLE_LOGIN: `${API_BASE_URL}/api/google/login`,
+  USERS: `${API_BASE_URL}/users`,
 
-  STUDENT_CLASSES: `${API_BASE_URL}/getclass`,
-
+  // ========= HOST / TEACHER =========
   TESTS: `${API_BASE_URL}/tests`,
-  GETTESTS: `${API_BASE_URL}/tests/class`,
-  SENDTEST: `${API_BASE_URL_DO_TEST}/answers/submit-test`,
-
-  GETQUESTIONS: `${API_BASE_URL_DO_TEST}/class-test/get-question-of-test`,
-  RESET_TEST:`${API_BASE_URL_DO_TEST}/class-test/reset-class-test`,
-
   CLASSES: `${API_BASE_URL}/class`,
-
-  JOINCLASS: `${API_BASE_URL}/class/joinclass`,
-  GENERATECODE: `${API_BASE_URL}/codeclass`,
-
+  GENERATE_CLASS_CODE: `${API_BASE_URL}/codeclass`,
   QUESTIONS: `${API_BASE_URL}/questions`,
+  TOPIC: `${API_BASE_URL}/topic`,
+  LEVEL: `${API_BASE_URL}/level`,
+  TYPE_QUESTION: `${API_BASE_URL}/type-question`,
+  RESET_TEST: `${API_BASE_URL}/class/reset-test`,
 
-  IMAGE: `${API_BASE_URL}/getfile`,
-  GETIMAGEFILES: `${API_BASE_URL}/getallimagefile`,
-  IMAGE_AUTHOR: `${API_BASE_URL}/getallfile`,
-  UPLOAD_IMAGE: `${API_BASE_URL}/upfile`,
+
+  // ========= STUDENT =========
+  JOIN_CLASS: `${API_BASE_URL}/class/joinclass`,
+
+  // ========= TEST PROCESS =========
+  STUDENT_CLASSES: `${API_BASE_URL_DO_TEST}/class-test/get-class`,
+  GET_TESTS_OF_CLASS: `${API_BASE_URL_DO_TEST}/class-test/get-test-of-class`,
+  START_TEST: `${API_BASE_URL_DO_TEST}/test-process/start`,
+  SUBMIT_TEST: `${API_BASE_URL_DO_TEST}/test-process/submit`,
+
+  // ========= FILE / S3 =========
+
+  DOWNLOAD: `${API_BASE_URL}/files/presign-download`,
+  UPLOAD: `${API_BASE_URL}/files/presign-upload`,
+  ALLFILE: `${API_BASE_URL}/files/get-files`,
+
+  USER: `${API_BASE_URL}/user`,
+
+  USER_ME: `${API_BASE_URL}/user/me`,
+
+  EXPORT_SUBMISSION_PDF: `${API_BASE_URL}/submissions/export/pdf`
+
+
 };
 
 export default API_ENDPOINTS;

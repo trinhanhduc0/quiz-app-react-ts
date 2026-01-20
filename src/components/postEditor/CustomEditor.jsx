@@ -473,7 +473,6 @@ const CustomEditor = ({
   const setBlockAlignment = useCallback(
     (alignment) => {
       const { baseType } = getCurrentStyles();
-      console.log(baseType, alignment);
       const newCombinedType = createBlockType(baseType, "align-" + alignment);
 
       setEditorState(RichUtils.toggleBlockType(editorState, newCombinedType));
@@ -561,7 +560,6 @@ const CustomEditor = ({
     const { baseType, alignment } = parseBlockType(blockType);
     let className = "";
 
-    console.log(baseType, alignment, blockType);
     // Set alignment class
     if (alignment !== CONSTANTS.ALIGNMENTS.LEFT) {
       className += `text-${alignment} `;
@@ -634,19 +632,14 @@ const CustomEditor = ({
   // Debug helper
   useEffect(() => {
     if (process.env.NODE_ENV === "development") {
-      console.log("Current block info:", {
-        fullBlockType,
-        baseType,
-        alignment,
-      });
+
     }
   }, [fullBlockType, baseType, alignment]);
 
   return (
     <div
-      className={`${width} ${
-        border ? "border border-gray-300" : ""
-      } p-2 rounded-md`}
+      className={`${width} ${border ? "border border-gray-300" : ""
+        } p-2 rounded-md`}
     >
       {/* Debug Panel (dev only) */}
       {process.env.NODE_ENV === "development" && (
